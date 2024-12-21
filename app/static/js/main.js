@@ -87,19 +87,25 @@ async function handleCredentialResponse(response) {
 
 function showSignedInState(email) {
   const downloadBtn = document.getElementById("downloadBtn");
+  const signInDiv = document.getElementById("signInDiv");
+  const setupInstructions = document.getElementById("setupInstructions");
+
   if (downloadBtn) {
     downloadBtn.classList.remove("hidden");
     downloadBtn.style.display = "block";
   }
+
+  if (signInDiv) {
+    signInDiv.style.display = "none";
+  }
+
+  if (setupInstructions) {
+    setupInstructions.style.display = "block";
+  }
+
   showMessage(`Authenticated as ${email}`, "success");
 }
 
-// Initialize when ready
-if (document.readyState === "complete") {
-  initializeGoogleSignIn();
-} else {
-  window.addEventListener("load", initializeGoogleSignIn);
-}
 function showMessage(message, type) {
   console.log(`${type}: ${message}`);
   const container = document.querySelector(".container");
@@ -115,4 +121,11 @@ function showMessage(message, type) {
     type === "success" ? "success-message" : "error-message";
   messageDiv.textContent = message;
   container.insertBefore(messageDiv, document.querySelector(".status"));
+}
+
+// Initialize when ready
+if (document.readyState === "complete") {
+  initializeGoogleSignIn();
+} else {
+  window.addEventListener("load", initializeGoogleSignIn);
 }
