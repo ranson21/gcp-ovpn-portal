@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>OpenVPN Authentication</title>
+    <script src="https://accounts.google.com/gsi/client" defer></script>
+    <link
+      rel="icon"
+      type="image/x-icon"
+      href="{{ url_for('static', filename='favicon.ico') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <h1>OpenVPN Authentication Portal</h1>
+      <p>To download your VPN configuration:</p>
+      <ol>
+        <li>Sign in with your organization account</li>
+        <li>Download your personalized OpenVPN configuration file</li>
+        <li>Import the configuration into your OpenVPN client</li>
+      </ol>
+
+      <div id="signInDiv"></div>
+      <button id="downloadBtn" class="download-btn hidden">
+        Download OpenVPN Config
+      </button>
+
+      <div class="status">Server Status: Active ✓</div>
+    </div>
+
+    <script>
+      const CLIENT_ID = "{{ client_id }}";
+      console.log("Client ID:", CLIENT_ID);
+    </script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  </body>
+</html>
