@@ -74,7 +74,7 @@ export const VPNDrawer = () => {
             React.createElement(
               "svg",
               {
-                className: "h-6 w-6 text-blue-600",
+                className: "h-6 w-6 text-orange-700",
                 viewBox: "0 0 24 24",
                 fill: "none",
                 stroke: "currentColor",
@@ -215,7 +215,7 @@ export const VPNDrawer = () => {
           React.createElement(
             "button",
             {
-              className: `w-full flex items-center justify-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 ${
+              className: `w-full flex items-center justify-center space-x-2 px-4 py-2 bg-orange-700 text-white rounded-lg hover:bg-blue-700 ${
                 !isAuthenticated ? "opacity-50 cursor-not-allowed" : ""
               }`,
               disabled: !isAuthenticated,
