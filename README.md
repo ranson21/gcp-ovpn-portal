@@ -4,7 +4,7 @@
 
 A secure, user-friendly authentication portal for OpenVPN configuration distribution. This application provides Google OAuth2 authentication and domain-restricted access to OpenVPN configuration files.
 
-![OpenVPN Auth Portal](docs/images/portal-preview.svg)
+![OpenVPN Auth Portal](docs/images/portal-preview.png)
 
 ## 🌟 Features
 
