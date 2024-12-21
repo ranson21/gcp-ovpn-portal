@@ -18,8 +18,8 @@ A secure, user-friendly authentication portal for OpenVPN configuration distribu
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/openvpn-auth-portal
-cd openvpn-auth-portal
+git clone https://github.com/ranson21/ovpn-client-web
+cd ovpn-client-web
 ```
 
 2. Create and activate a virtual environment:
