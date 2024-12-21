@@ -103,6 +103,35 @@ def download_config(email):
         return jsonify({"error": str(e)}), 500
 
 
+@bp.route("/vpn-status")
+def vpn_status():
+    # Try to get the real IP address from various headers
+    client_ip = (
+        request.headers.get("X-Forwarded-For", "").split(",")[0].strip()
+        or request.headers.get("X-Real-IP", "").strip()
+        or request.headers.get("CF-Connecting-IP", "").strip()
+        or request.remote_addr
+    )
+
+    print(client_ip)
+
+    vpn_network = current_app.config.get("VPN_NETWORK", "10.8.0.0/24")
+
+    try:
+        # Convert IP and network to ipaddress objects for comparison
+        from ipaddress import ip_address, ip_network
+
+        client_ip_obj = ip_address(client_ip)
+        vpn_net = ip_network(vpn_network)
+
+        # Check if the IP is in the VPN network range
+        is_connected = client_ip_obj in vpn_net
+
+        return jsonify({"connected": is_connected, "client_ip": str(client_ip_obj)})
+    except Exception as e:
+        return jsonify({"connected": False, "client_ip": client_ip, "error": str(e)})
+
+
 @bp.route("/health")
 def health_check():
     return jsonify({"status": "healthy"}), 200

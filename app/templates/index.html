@@ -20,9 +20,9 @@
     <!-- Inject Flask variables -->
     <script>
       window.CLIENT_ID = "{{ client_id }}";
-      if (error) {
-        window.AUTH_ERROR = "{{ error }}";
-      }
+      // if (error) {
+      //   window.AUTH_ERROR = "{{ error }}";
+      // }
     </script>
     <script type="module" src="{{ url_for('static', filename='js/main.js') }}"></script>
   </head>

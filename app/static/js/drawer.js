@@ -3,6 +3,11 @@ export const VPNDrawer = () => {
   const [isAuthenticated, setIsAuthenticated] = React.useState(false);
   const [authToken, setAuthToken] = React.useState(null);
   const [authEmail, setAuthEmail] = React.useState(null);
+  const [vpnStatus, setVpnStatus] = React.useState({
+    connected: false,
+    clientIp: null,
+    loading: true,
+  });
 
   // Listen for authentication state changes
   React.useEffect(() => {
@@ -15,6 +20,102 @@ export const VPNDrawer = () => {
     window.addEventListener("authStateChanged", handleAuthState);
     return () =>
       window.removeEventListener("authStateChanged", handleAuthState);
+  }, []);
+
+  // Poll VPN connection status
+  React.useEffect(() => {
+    const getNetworkIPs = () => {
+      return new Promise((resolve, reject) => {
+        const ips = new Set();
+        const RTCPeerConnection =
+          window.RTCPeerConnection ||
+          window.webkitRTCPeerConnection ||
+          window.mozRTCPeerConnection;
+
+        if (!RTCPeerConnection) {
+          reject(new Error("WebRTC not supported"));
+          return;
+        }
+
+        // Set a timeout to force completion
+        const timeout = setTimeout(() => {
+          if (pc) pc.close();
+          resolve(Array.from(ips));
+        }, 1000); // Shorter timeout
+
+        const pc = new RTCPeerConnection({
+          iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+          iceCandidatePoolSize: 1, // Minimize candidates
+        });
+
+        pc.createDataChannel("");
+
+        pc.onicecandidate = (e) => {
+          if (!e.candidate) {
+            clearTimeout(timeout);
+            pc.close();
+            resolve(Array.from(ips));
+            return;
+          }
+
+          const ipMatch =
+            /([0-9]{1,3}(\.[0-9]{1,3}){3}|[a-f0-9]{1,4}(:[a-f0-9]{1,4}){7})/i.exec(
+              e.candidate.candidate
+            );
+          if (ipMatch && ipMatch[1]) {
+            ips.add(ipMatch[1]);
+          }
+        };
+
+        pc.createOffer()
+          .then((offer) => pc.setLocalDescription(offer))
+          .catch((err) => {
+            clearTimeout(timeout);
+            pc.close();
+            reject(err);
+          });
+      });
+    };
+
+    const checkVpnStatus = async () => {
+      setVpnStatus((prev) => ({ ...prev, loading: true }));
+
+      try {
+        const ips = await getNetworkIPs();
+
+        // Check if any of our IPs are in the VPN range
+        const isVpnConnected = ips.some((ip) => {
+          try {
+            return ip.startsWith("34.42.2"); // This should match your VPN network prefix
+          } catch (err) {
+            console.error("Error checking IP:", err);
+            return false;
+          }
+        });
+
+        setVpnStatus({
+          connected: isVpnConnected,
+          clientIp: ips.find((ip) => ip.startsWith("34.42.2")) || ips[0],
+          allIps: ips,
+          loading: false,
+        });
+      } catch (error) {
+        console.error("Error checking VPN status:", error);
+        setVpnStatus({
+          connected: false,
+          clientIp: "Unknown",
+          loading: false,
+        });
+      }
+    };
+
+    // Check immediately
+    checkVpnStatus();
+
+    // Then check every 10 seconds
+    const interval = setInterval(checkVpnStatus, 10000);
+
+    return () => clearInterval(interval);
   }, []);
 
   // Download handler
@@ -103,6 +204,7 @@ export const VPNDrawer = () => {
             key: "status",
           },
           [
+            // Server Status
             React.createElement(
               "div",
               {
@@ -130,7 +232,7 @@ export const VPNDrawer = () => {
                 key: "status-details",
               },
               [
-                React.createElement("span", null, "Status"),
+                React.createElement("span", null, "Server Status"),
                 React.createElement(
                   "div",
                   {
@@ -161,6 +263,98 @@ export const VPNDrawer = () => {
                 ),
               ]
             ),
+            // VPN Connection Status
+            React.createElement(
+              "div",
+              {
+                className:
+                  "flex items-center justify-between text-sm text-gray-600 border-t border-gray-100 pt-4 mt-4",
+                key: "vpn-status",
+              },
+              [
+                React.createElement("span", null, "VPN Connection"),
+                React.createElement(
+                  "div",
+                  {
+                    className: "flex items-center space-x-1",
+                  },
+                  vpnStatus.loading
+                    ? [
+                        React.createElement("div", {
+                          className:
+                            "animate-spin rounded-full h-4 w-4 border-2 border-gray-300 border-t-gray-600",
+                        }),
+                        React.createElement(
+                          "span",
+                          {
+                            className: "text-gray-600",
+                          },
+                          "Checking..."
+                        ),
+                      ]
+                    : [
+                        React.createElement(
+                          "svg",
+                          {
+                            className: `h-4 w-4 ${
+                              vpnStatus.connected
+                                ? "text-green-500"
+                                : "text-red-500"
+                            }`,
+                            viewBox: "0 0 24 24",
+                            fill: "none",
+                            stroke: "currentColor",
+                            strokeWidth: "2",
+                          },
+                          vpnStatus.connected
+                            ? React.createElement("polyline", {
+                                points: "20 6 9 17 4 12",
+                              })
+                            : React.createElement("line", {
+                                x1: "18",
+                                y1: "6",
+                                x2: "6",
+                                y2: "18",
+                              })
+                        ),
+                        React.createElement(
+                          "span",
+                          {
+                            className: vpnStatus.connected
+                              ? "text-green-600"
+                              : "text-red-600",
+                          },
+                          vpnStatus.connected ? "Connected" : "Disconnected"
+                        ),
+                      ]
+                ),
+              ]
+            ),
+            vpnStatus.clientIp &&
+              React.createElement(
+                "div",
+                {
+                  className: "text-xs text-gray-500 mt-2",
+                  key: "client-ip",
+                },
+                [
+                  React.createElement(
+                    "div",
+                    { key: "current-ip" },
+                    `Current IP: ${vpnStatus.clientIp}`
+                  ),
+                  window.location.hostname === "localhost" &&
+                    vpnStatus.allIps &&
+                    React.createElement(
+                      "div",
+                      {
+                        className: "text-xs mt-1 text-gray-400",
+                        key: "all-ips",
+                      },
+                      `All IPs: ${vpnStatus.allIps.join(", ")}`
+                    ),
+                ]
+              ),
           ]
         ),
 
@@ -196,13 +390,13 @@ export const VPNDrawer = () => {
                   ? `Signed in: ${authEmail}`
                   : "Not authenticated"
               ),
+              React.createElement("div", {
+                id: "signInDiv",
+                className: "w-full scale-90 origin-left",
+                key: "sign-in",
+              }),
             ]
-          ),
-          React.createElement("div", {
-            id: "signInDiv",
-            className: "w-full scale-90 origin-left",
-            key: "sign-in",
-          })
+          )
         ),
 
         // Download Button
@@ -215,7 +409,7 @@ export const VPNDrawer = () => {
           React.createElement(
             "button",
             {
-              className: `w-full flex items-center justify-center space-x-2 px-4 py-2 bg-orange-700 text-white rounded-lg hover:bg-blue-700 ${
+              className: `w-full flex items-center justify-center space-x-2 px-4 py-2 bg-orange-700 text-white rounded-lg hover:bg-orange-800 ${
                 !isAuthenticated ? "opacity-50 cursor-not-allowed" : ""
               }`,
               disabled: !isAuthenticated,
