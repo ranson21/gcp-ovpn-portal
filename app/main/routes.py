@@ -1,4 +1,12 @@
-from flask import render_template, jsonify, request, send_file, current_app
+from flask import (
+    render_template,
+    jsonify,
+    request,
+    send_file,
+    current_app,
+    redirect,
+    url_for,
+)
 import tempfile
 import os
 from google.oauth2 import id_token
@@ -13,7 +21,13 @@ from flask import session
 @bp.route("/auth-status")
 def auth_status():
     if "email" in session:
-        return jsonify({"authenticated": True, "email": session["email"]})
+        return jsonify(
+            {
+                "authenticated": True,
+                "email": session["email"],
+                "token": session["token"],
+            }
+        )
     return jsonify({"authenticated": False})
 
 
@@ -23,7 +37,7 @@ def index():
         try:
             credential = request.form.get("credential")
             if not credential:
-                return jsonify({"error": "No credential provided"}), 400
+                return redirect(url_for("main.index", error="No credential provided"))
 
             idinfo = id_token.verify_oauth2_token(
                 credential, requests.Request(), current_app.config["CLIENT_ID"]
@@ -31,18 +45,24 @@ def index():
             email = idinfo.get("email", "")
 
             if not email.endswith("@" + current_app.config["ALLOWED_DOMAIN"]):
-                return jsonify({"error": "Invalid domain"}), 403
+                return redirect(url_for("main.index", error="Invalid domain"))
 
             # Store in session
             session["email"] = email
             session["token"] = credential
 
-            return jsonify({"success": True, "email": email, "token": credential})
-        except Exception as e:
-            return jsonify({"error": str(e)}), 400
+            # Redirect back to the main page
+            return redirect(url_for("main.index"))
 
+        except Exception as e:
+            return redirect(url_for("main.index", error=str(e)))
+
+    # Handle GET request
+    error = request.args.get("error")
     response = make_response(
-        render_template("index.html", client_id=current_app.config["CLIENT_ID"])
+        render_template(
+            "index.html", client_id=current_app.config["CLIENT_ID"], error=error
+        )
     )
     response.headers["Cross-Origin-Opener-Policy"] = "same-origin-allow-popups"
     return response
