@@ -61,7 +61,10 @@ def index():
     error = request.args.get("error")
     response = make_response(
         render_template(
-            "index.html", client_id=current_app.config["CLIENT_ID"], error=error
+            "index.html",
+            client_id=current_app.config["CLIENT_ID"],
+            vpn_network=current_app.config.get("VPN_NETWORK", "10.8.0.0/24"),
+            error=error,
         )
     )
     response.headers["Cross-Origin-Opener-Policy"] = "same-origin-allow-popups"

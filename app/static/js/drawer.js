@@ -8,6 +8,11 @@ export const VPNDrawer = () => {
     clientIp: null,
     loading: true,
   });
+  const [serverStatus, setServerStatus] = React.useState({
+    isActive: false,
+    isOperational: false,
+    loading: true,
+  });
 
   // Listen for authentication state changes
   React.useEffect(() => {
@@ -20,6 +25,37 @@ export const VPNDrawer = () => {
     window.addEventListener("authStateChanged", handleAuthState);
     return () =>
       window.removeEventListener("authStateChanged", handleAuthState);
+  }, []);
+
+  // Poll server status
+  React.useEffect(() => {
+    const checkServerStatus = async () => {
+      try {
+        const response = await fetch("/health");
+        const data = await response.json();
+
+        setServerStatus({
+          isActive: true,
+          isOperational: data.status === "healthy",
+          loading: false,
+        });
+      } catch (error) {
+        console.error("Error checking server status:", error);
+        setServerStatus({
+          isActive: false,
+          isOperational: false,
+          loading: false,
+        });
+      }
+    };
+
+    // Check immediately
+    checkServerStatus();
+
+    // Then check every 30 seconds
+    const interval = setInterval(checkServerStatus, 10000);
+
+    return () => clearInterval(interval);
   }, []);
 
   // Poll VPN connection status
@@ -83,10 +119,14 @@ export const VPNDrawer = () => {
       try {
         const ips = await getNetworkIPs();
 
+        // Get the VPN network from window globals
+        const vpnNetworkPrefix =
+          window.VPN_NETWORK?.split(".").slice(0, 2).join(".") || "10.8";
+
         // Check if any of our IPs are in the VPN range
         const isVpnConnected = ips.some((ip) => {
           try {
-            return ip.startsWith("34.42.2"); // This should match your VPN network prefix
+            return ip.startsWith(vpnNetworkPrefix);
           } catch (err) {
             console.error("Error checking IP:", err);
             return false;
@@ -95,7 +135,7 @@ export const VPNDrawer = () => {
 
         setVpnStatus({
           connected: isVpnConnected,
-          clientIp: ips.find((ip) => ip.startsWith("34.42.2")) || ips[0],
+          clientIp: ips.find((ip) => ip.startsWith("10.8.")) || ips[0],
           allIps: ips,
           loading: false,
         });
@@ -112,7 +152,7 @@ export const VPNDrawer = () => {
     // Check immediately
     checkVpnStatus();
 
-    // Then check every 10 seconds
+    // Then check every 30 seconds instead of 10
     const interval = setInterval(checkVpnStatus, 10000);
 
     return () => clearInterval(interval);
@@ -172,26 +212,53 @@ export const VPNDrawer = () => {
             key: "logo",
           },
           [
+            // OpenVPN Logo
             React.createElement(
-              "svg",
+              "div",
               {
-                className: "h-6 w-6 text-orange-700",
-                viewBox: "0 0 24 24",
-                fill: "none",
-                stroke: "currentColor",
-                strokeWidth: "2",
-                key: "shield-icon",
+                className: "h-8 flex items-center",
+                key: "openvpn-logo",
               },
-              React.createElement("path", {
-                d: "M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z",
-              })
-            ),
-            React.createElement(
-              "h2",
-              {
-                className: "text-lg font-semibold text-gray-900",
-              },
-              "VPN Portal"
+              React.createElement(
+                "svg",
+                {
+                  height: "32",
+                  viewBox: "0 0 240 80",
+                  className: "h-full w-auto",
+                  fill: "none",
+                  xmlns: "http://www.w3.org/2000/svg",
+                },
+                [
+                  // Shield background
+                  React.createElement("path", {
+                    d: "M28 72s32-16 32-40V12L28 0 0 12v20c0 24 28 40 28 40z",
+                    fill: "#F78B1F", // OpenVPN orange
+                    key: "shield",
+                  }),
+                  // Lock symbol
+                  React.createElement("path", {
+                    d: "M28 16c-4.4 0-8 3.6-8 8v4h-4v16h24V28h-4v-4c0-4.4-3.6-8-8-8zm0 4c2.2 0 4 1.8 4 4v4H24v-4c0-2.2 1.8-4 4-4z",
+                    fill: "white",
+                    key: "lock",
+                  }),
+                  // Text
+                  React.createElement(
+                    "text",
+                    {
+                      x: "70",
+                      y: "45",
+                      style: {
+                        fontFamily: "Arial, sans-serif",
+                        fontSize: "32px",
+                        fontWeight: "bold",
+                        fill: "#333333",
+                      },
+                      key: "text",
+                    },
+                    "OpenVPN"
+                  ),
+                ]
+              )
             ),
           ]
         ),
@@ -213,14 +280,30 @@ export const VPNDrawer = () => {
               },
               [
                 React.createElement("div", {
-                  className: "h-2 w-2 rounded-full bg-green-500",
+                  className: `h-2 w-2 rounded-full ${
+                    serverStatus.loading
+                      ? "bg-gray-300"
+                      : serverStatus.isActive && serverStatus.isOperational
+                      ? "bg-green-500"
+                      : "bg-red-500"
+                  }`,
                 }),
                 React.createElement(
                   "span",
                   {
-                    className: "text-sm font-medium text-green-700",
+                    className: `text-sm font-medium ${
+                      serverStatus.loading
+                        ? "text-gray-500"
+                        : serverStatus.isActive && serverStatus.isOperational
+                        ? "text-green-700"
+                        : "text-red-700"
+                    }`,
                   },
-                  "Server Active"
+                  serverStatus.loading
+                    ? "Checking Status..."
+                    : serverStatus.isActive && serverStatus.isOperational
+                    ? "Server Active"
+                    : "Server Offline"
                 ),
               ]
             ),
@@ -238,28 +321,55 @@ export const VPNDrawer = () => {
                   {
                     className: "flex items-center space-x-1",
                   },
-                  [
-                    React.createElement(
-                      "svg",
-                      {
-                        className: "h-4 w-4 text-green-500",
-                        viewBox: "0 0 24 24",
-                        fill: "none",
-                        stroke: "currentColor",
-                        strokeWidth: "2",
-                      },
-                      React.createElement("polyline", {
-                        points: "20 6 9 17 4 12",
-                      })
-                    ),
-                    React.createElement(
-                      "span",
-                      {
-                        className: "text-green-600",
-                      },
-                      "Operational"
-                    ),
-                  ]
+                  serverStatus.loading
+                    ? [
+                        React.createElement("div", {
+                          className:
+                            "animate-spin rounded-full h-4 w-4 border-2 border-gray-300 border-t-gray-600",
+                        }),
+                        React.createElement(
+                          "span",
+                          {
+                            className: "text-gray-600",
+                          },
+                          "Checking..."
+                        ),
+                      ]
+                    : [
+                        React.createElement(
+                          "svg",
+                          {
+                            className: `h-4 w-4 ${
+                              serverStatus.isOperational
+                                ? "text-green-500"
+                                : "text-red-500"
+                            }`,
+                            viewBox: "0 0 24 24",
+                            fill: "none",
+                            stroke: "currentColor",
+                            strokeWidth: "2",
+                          },
+                          serverStatus.isOperational
+                            ? React.createElement("polyline", {
+                                points: "20 6 9 17 4 12",
+                              })
+                            : React.createElement("line", {
+                                x1: "18",
+                                y1: "6",
+                                x2: "6",
+                                y2: "18",
+                              })
+                        ),
+                        React.createElement(
+                          "span",
+                          {
+                            className: serverStatus.isOperational
+                              ? "text-green-600"
+                              : "text-red-600",
+                          },
+                          serverStatus.isOperational ? "Operational" : "Offline"
+                        ),
+                      ]
                 ),
               ]
             ),
