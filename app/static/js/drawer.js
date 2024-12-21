@@ -175,7 +175,7 @@ export const VPNDrawer = () => {
             "div",
             {
               className:
-                "bg-white p-4 rounded-lg shadow-sm border border-gray-200 overflow-hidden",
+                "bg-white p-4 rounded-lg shadow-sm border border-gray-200",
             },
             [
               React.createElement(
@@ -189,7 +189,7 @@ export const VPNDrawer = () => {
               React.createElement(
                 "div",
                 {
-                  className: "text-xs text-gray-600 mb-4 truncate",
+                  className: "text-xs text-gray-600 mb-4",
                   key: "auth-status",
                 },
                 isAuthenticated
