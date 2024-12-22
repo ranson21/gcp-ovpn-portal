@@ -1,0 +1,179 @@
+steps:
+  # Get latest version
+  - name: "us-central1-docker.pkg.dev/abby-ranson/docker/github-ops-builder"
+    args:
+      [
+        "--action",
+        "get-version",
+        "--repo-owner",
+        "${_REPO_OWNER}",
+        "--repo-name",
+        "ovpn-client-web",
+      ]
+    secretEnv: ["GITHUB_TOKEN"]
+    id: "get-version"
+
+  # Process PR info and bump version
+  - name: "us-central1-docker.pkg.dev/abby-ranson/docker/github-ops-builder"
+    entrypoint: "bash"
+    args:
+      - "-c"
+      - |
+        echo "Debug environment variables:"
+        echo "PR_TYPE value: ${_PR_TYPE}"
+        echo "IS_MERGE value: ${_IS_MERGE}"
+
+        VERSION_TYPE="${_PR_TYPE}"
+        if [ -z "${_PR_TYPE}" ]; then
+          VERSION_TYPE="timestamp"
+        fi
+
+        python /usr/local/bin/cli.py \
+          --action bump-version \
+          --repo-owner ${_REPO_OWNER} \
+          --repo-name ovpn-client-web \
+          --current-version "$$(cat current_version.txt)" \
+          --version-type "$${VERSION_TYPE}" \
+          --is-merge "${_IS_MERGE}" \
+          --pr-number "${_PR_NUMBER}"
+    secretEnv: ["GITHUB_TOKEN"]
+    id: "bump-version"
+    waitFor: ["get-version"]
+
+  # Update pyproject.toml version
+  - name: "python:3.8"
+    entrypoint: "bash"
+    args:
+      - "-c"
+      - |
+        NEW_VERSION=$(cat new_version.txt)
+        pip install toml
+        python -c "
+        import toml
+        config = toml.load('pyproject.toml')
+        config['tool']['poetry']['version'] = '${NEW_VERSION}'
+        with open('pyproject.toml', 'w') as f:
+            toml.dump(config, f)
+        "
+    id: "update-version"
+    waitFor: ["bump-version"]
+
+  # Install Poetry and dependencies
+  - name: "python:3.8"
+    entrypoint: "bash"
+    args:
+      - "-c"
+      - |
+        curl -sSL https://install.python-poetry.org | python3 -
+        export PATH="/root/.local/bin:$PATH"
+        poetry config virtualenvs.create false
+        poetry install
+    id: "install"
+    waitFor: ["update-version"]
+
+  # Run tests with coverage
+  - name: "python:3.8"
+    entrypoint: "bash"
+    args:
+      - "-c"
+      - |
+        export PATH="/root/.local/bin:$PATH"
+        poetry run pytest --cov=vpn_portal --cov-report=xml --cov-report=term-missing tests/ -v
+        # Upload coverage data to Cloud Storage
+        poetry run python -m pip install codecov
+        poetry run codecov -f coverage.xml -t $CODECOV_TOKEN
+    id: "test"
+    secretEnv: ["CODECOV_TOKEN"]
+    waitFor: ["install"]
+
+  # Build package
+  - name: "python:3.8"
+    entrypoint: "bash"
+    args:
+      - "-c"
+      - |
+        export PATH="/root/.local/bin:$PATH"
+        poetry build
+    id: "build"
+    waitFor: ["test"]
+
+  # Publish to PyPI if this is a merge to main
+  - name: "python:3.8"
+    entrypoint: "bash"
+    args:
+      - "-c"
+      - |
+        if [[ "${_IS_MERGE}" == "true" ]]; then
+          export PATH="/root/.local/bin:$PATH"
+          poetry config pypi-token.pypi $$PYPI_TOKEN
+          poetry publish
+        else
+          echo "Skipping PyPI publish for non-merge build"
+        fi
+    secretEnv: ["PYPI_TOKEN"]
+    id: "publish"
+    waitFor: ["build"]
+
+  # Create GitHub release
+  - name: "us-central1-docker.pkg.dev/abby-ranson/docker/github-ops-builder"
+    entrypoint: "bash"
+    args:
+      - "-c"
+      - |
+        echo "Content of new_version.txt: $(cat new_version.txt)"
+        VERSION=$(cat new_version.txt)
+        if [[ "${_IS_MERGE}" != "true" ]]; then
+          python /usr/local/bin/cli.py \
+            --action create-release \
+            --repo-owner ${_REPO_OWNER} \
+            --repo-name ovpn-client-web \
+            --current-version "$${VERSION}" \
+            --is-draft
+        else
+          python /usr/local/bin/cli.py \
+            --action create-release \
+            --repo-owner ${_REPO_OWNER} \
+            --repo-name ovpn-client-web \
+            --current-version "$${VERSION}"
+        fi
+    secretEnv: ["GITHUB_TOKEN"]
+    id: "create-release"
+    waitFor: ["publish"]
+
+  # Update parent repo submodule
+  - name: "us-central1-docker.pkg.dev/abby-ranson/docker/github-ops-builder"
+    args:
+      [
+        "--action",
+        "update-submodule",
+        "--repo-owner",
+        "${_REPO_OWNER}",
+        "--repo-name",
+        "ovpn-client-web",
+        "--parent-repo",
+        "portfolio",
+        "--submodule-path",
+        "apps/web/ovpn-client",
+        "--current-version",
+        "$$(cat new_version.txt)",
+        "--is-merge",
+        "${_IS_MERGE}",
+      ]
+    secretEnv: ["GITHUB_TOKEN"]
+    id: "update-submodule"
+    waitFor: ["create-release"]
+
+availableSecrets:
+  secretManager:
+    - versionName: projects/$PROJECT_ID/secrets/github_token/versions/latest
+      env: "GITHUB_TOKEN"
+    - versionName: projects/$PROJECT_ID/secrets/pypi_token/versions/latest
+      env: "PYPI_TOKEN"
+    - versionName: projects/$PROJECT_ID/secrets/codecov_token/versions/latest
+      env: "CODECOV_TOKEN"
+
+substitutions:
+  _PR_TYPE: ""
+  _REPO_OWNER: ""
+  _IS_MERGE: "false"
+  _PR_NUMBER: ""

@@ -1,6 +1,6 @@
 # 🔐 OpenVPN Authentication Portal
 
-[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/) [![Flask](https://img.shields.io/badge/flask-2.0+-green.svg)](https://flask.palletsprojects.com/) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/) [![Flask](https://img.shields.io/badge/flask-2.0+-green.svg)](https://flask.palletsprojects.com/) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![codecov](https://codecov.io/gh/ranson21/ovpn-portal/branch/main/graph/badge.svg)](https://codecov.io/gh/ranson21/ovpn-portal) [![Code Coverage](https://img.shields.io/badge/coverage-90%25-brightgreen.svg)](https://codecov.io/gh/ranson21/ovpn-portal)
 
 A secure, user-friendly authentication portal for OpenVPN configuration distribution. This application provides Google OAuth2 authentication and domain-restricted access to OpenVPN configuration files.
 
@@ -14,7 +14,15 @@ A secure, user-friendly authentication portal for OpenVPN configuration distribu
 - 🎨 Clean, responsive web interface
 - 🚀 Easy deployment and configuration
 
-## 🚀 Quick Start
+## 📦 Installation
+
+### Via pip
+
+```bash
+pip install ovpn-portal
+```
+
+### Development Setup
 
 1. Clone the repository:
 ```bash
@@ -22,45 +30,88 @@ git clone https://github.com/ranson21/ovpn-client-web
 cd ovpn-client-web
 ```
 
-2. Create and activate a virtual environment:
+2. Install with Poetry:
 ```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: .\venv\Scripts\activate
+poetry install
 ```
 
-3. Install dependencies:
-```bash
-make install
-```
+## 🔧 Configuration
 
-4. Set up your environment variables:
+### Google OAuth2 Setup
+
+1. Go to the [Google Cloud Console](https://console.cloud.google.com/)
+2. Create a new project or select an existing one
+3. Enable the Google OAuth2 API:
+   - Go to "APIs & Services" > "Library"
+   - Search for "Google OAuth2"
+   - Click "Enable"
+4. Configure the OAuth consent screen:
+   - Go to "APIs & Services" > "OAuth consent screen"
+   - Choose "Internal" if using Google Workspace, or "External" if not
+   - Fill in the application name and other required fields
+   - Add the necessary scopes (email, profile)
+5. Create OAuth 2.0 credentials:
+   - Go to "APIs & Services" > "Credentials"
+   - Click "Create Credentials" > "OAuth client ID"
+   - Choose "Web application"
+   - Add authorized redirect URIs:
+     - For local development: `http://localhost:8081`
+     - For production: `https://your-domain.com`
+   - Save your Client ID and Client Secret
+
+### Environment Variables
+
+The following environment variables are required:
+
+- `CLIENT_ID`: Google OAuth2 client ID (obtained from steps above)
+- `ALLOWED_DOMAIN`: Authorized email domain (e.g., "company.com")
+- `EXTERNAL_IP`: VPN server's external IP address
+- `OPENVPN_DIR`: Directory containing OpenVPN configuration files (default: /etc/openvpn)
+
+Create a .env file:
 ```bash
 cp .env.example .env
 # Edit .env with your configuration
 ```
 
-5. Run the development server:
-```bash
-make run
+Example .env file:
+```
+CLIENT_ID=your-google-client-id.apps.googleusercontent.com
+ALLOWED_DOMAIN=yourcompany.com
+EXTERNAL_IP=203.0.113.1
+OPENVPN_DIR=/etc/openvpn
 ```
 
-## 🔧 Configuration
+## 🚀 Usage
 
-The following environment variables are required:
+### Running as an installed package
 
-- `CLIENT_ID`: Google OAuth2 client ID
-- `ALLOWED_DOMAIN`: Authorized email domain (e.g., "company.com")
-- `EXTERNAL_IP`: VPN server's external IP address
+```bash
+# Run the VPN portal
+ovpn-portal
+```
+
+### Running in development mode
+
+```bash
+# Using Poetry
+poetry run ovpn-portal
+
+# Or using make
+make run
+```
 
 ## 📁 Project Structure
 
 ```
 openvpn-auth-portal/
-├── app/
+├── vpn_portal/
 │   ├── __init__.py
-│   ├── routes.py
-│   ├── auth.py
-│   └── vpn.py
+│   ├── app/
+│   │   ├── routes.py
+│   │   ├── auth.py
+│   │   └── vpn.py
+│   └── run.py
 ├── static/
 │   ├── css/
 │   │   └── style.css
@@ -71,28 +122,68 @@ openvpn-auth-portal/
 │   └── index.html
 ├── tests/
 │   └── test_app.py
+├── pyproject.toml
 ├── .env.example
 ├── .gitignore
-├── Makefile
-├── README.md
-└── requirements.txt
+└── README.md
 ```
 
 ## 🛠️ Development
 
-Run tests:
+The project includes a Makefile to help with common development tasks:
+
+### First Time Setup
 ```bash
-make test
+make dev-setup    # Install Poetry, initialize git, and install dependencies
 ```
 
-Format code:
+### Common Commands
 ```bash
-make format
+make install      # Install project dependencies
+make run         # Run development server
+make test        # Run test suite
+make coverage    # Run tests with coverage report
+make format      # Format code with black and isort
+make lint        # Run linting checks
+make clean       # Clean temporary files and builds
 ```
 
-Lint code:
+### Test Coverage
+
+To run tests with coverage reporting:
 ```bash
-make lint
+make coverage
+```
+
+This will:
+- Run all tests with coverage tracking
+- Generate a terminal report showing missing lines
+- Create an HTML coverage report in `coverage_html/`
+
+View the HTML coverage report:
+```bash
+make coverage-open  # On macOS
+# Or open coverage_html/index.html in your browser
+```
+
+### Package Management
+```bash
+make build       # Build package distribution
+make develop     # Install package locally in editable mode
+```
+
+### Publishing
+```bash
+make publish-test  # Publish to Test PyPI
+make publish      # Publish to PyPI
+```
+
+You can also use Poetry directly for development tasks:
+```bash
+poetry install    # Install dependencies
+poetry run pytest # Run tests
+poetry run black . # Format code
+poetry run flake8 # Lint code
 ```
 
 ## 🔒 Security Considerations
@@ -109,7 +200,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🤝 Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
-
 
 ## 👤 Author
 

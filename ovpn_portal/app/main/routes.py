@@ -11,11 +11,12 @@ import tempfile
 import os
 from google.oauth2 import id_token
 from google.auth.transport import requests
-from app.main import bp
-from app.auth.routes import require_auth
-from app.vpn import generate_ovpn_config
 from flask import make_response
 from flask import session
+
+from ..main import bp
+from ..middleware import require_auth
+from ..vpn import generate_ovpn_config
 
 
 @bp.route("/auth-status")

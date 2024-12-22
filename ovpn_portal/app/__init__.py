@@ -1,12 +1,23 @@
 from flask import Flask
 from flask_cors import CORS
-from app.config import Config
 import os
+from importlib.resources import files
+
+from .config import Config
+from .main import bp as main_bp
 
 
 def create_app(config_class=Config):
-    app = Flask(__name__, template_folder="templates", static_folder="static")
-    app.debug = True
+    # Create Flask app with package-aware static and template folders
+    app = Flask(
+        __name__,
+        static_folder=str(files("ovpn_portal") / "static"),
+        template_folder=str(files("ovpn_portal") / "templates"),
+    )
+
+    # Load config
+    app.config.from_object("ovpn_portal.app.config.Config")
+
     # Add this after creating your Flask app
     CORS(
         app,
@@ -17,17 +28,11 @@ def create_app(config_class=Config):
             }
         },
     )
-    app.config.from_object(config_class)
+
     app.secret_key = os.environ.get("FLASK_SECRET_KEY", "your-secret-key-here")
     app.config["VPN_NETWORK"] = os.environ.get("VPN_NETWORK", "10.8.0.0/24")
 
     # Register blueprints
-    from app.auth import bp as auth_bp
-
-    app.register_blueprint(auth_bp)
-
-    from app.main import bp as main_bp
-
     app.register_blueprint(main_bp)
 
     return app

@@ -1,36 +1,37 @@
-.PHONY: install run test lint format clean
+.PHONY: install run test lint format clean build publish-test publish dev-setup
 
-# Python executable
-PYTHON = python3
-VENV = venv
-BIN = $(VENV)/bin/
+# Poetry as the package manager
+POETRY = poetry
 
-# Install all dependencies
+# Install dependencies
 install:
-	$(PYTHON) -m venv $(VENV)
-	$(BIN)pip install --upgrade pip
-	$(BIN)pip install -r requirements.txt
+	$(POETRY) install
 
 # Run development server
 run:
-	$(BIN)python -m flask run --debug --port 8081
+	$(POETRY) run ovpn-portal
 
 # Run tests
 test:
-	$(BIN)pytest tests/ -v
+	$(POETRY) run pytest tests/ -v
+
+# Run tests with coverage
+coverage:
+	$(POETRY) run pytest --cov=vpn_portal --cov-report=term-missing --cov-report=html tests/
+	@echo "Coverage report generated in coverage_html/index.html"
 
 # Run linting
 lint:
-	$(BIN)flake8 app/ tests/
-	$(BIN)black --check app/ tests/
-	$(BIN)isort --check-only app/ tests/
+	$(POETRY) run flake8 ovpn_portal/ tests/
+	$(POETRY) run black --check ovpn_portal/ tests/
+	$(POETRY) run isort --check-only ovpn_portal/ tests/
 
 # Format code
 format:
-	$(BIN)black app/ tests/
-	$(BIN)isort app/ tests/
+	$(POETRY) run black ovpn_portal/ tests/
+	$(POETRY) run isort ovpn_portal/ tests/
 
-# Clean up temporary files and virtual environment
+# Clean up temporary files and builds
 clean:
 	rm -rf __pycache__
 	rm -rf *.pyc
@@ -40,4 +41,32 @@ clean:
 	rm -rf dist
 	rm -rf build
 	rm -rf *.egg-info
-	rm -rf $(VENV)
+	find . -type d -name __pycache__ -exec rm -r {} +
+
+# Build package
+build:
+	$(POETRY) build
+
+# Publish to Test PyPI
+publish-test:
+	$(POETRY) config pypi-token.pypi $$PYPI_TOKEN
+	$(POETRY) config repositories.testpypi https://test.pypi.org/legacy/
+	$(POETRY) publish -r testpypi
+
+# Publish to PyPI
+publish:
+	$(POETRY) config pypi-token.pypi $$PYPI_TOKEN
+	$(POETRY) publish
+
+# Setup local development environment
+dev-setup:
+	curl -sSL https://install.python-poetry.org | python3 -
+	$(POETRY) config virtualenvs.in-project true
+	$(POETRY) install
+	git init
+	git add .
+	git commit -m "Initial commit"
+
+# Install package locally in editable mode
+develop:
+	pip install -e .
