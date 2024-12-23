@@ -71,15 +71,15 @@ steps:
     id: "install"
     waitFor: ["update-version"]
 
-  - name: "cimg/python:3.8"
+  - name: "ubuntu:22.04"
     entrypoint: "bash"
     secretEnv: ["CODECOV_TOKEN"]
     args:
       - "-c"
       - |
         export PATH="/builder/home/.local/bin:$_PATH"
-        # Install required packages
-        apt-get update && apt-get install -y make git
+        # Install Python and required packages
+        apt-get update && apt-get install -y python3 python3-pip make git
 
         # Run regular tests using make command
         make test
