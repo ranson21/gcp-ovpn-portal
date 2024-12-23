@@ -77,7 +77,6 @@ steps:
 
         if [[ "${_IS_MERGE}" == "false" ]]; then
           make coverage
-          export CODECOV_SLUG=${_REPO_OWNER}/gcp-ovpn-portal
 
           poetry run python -m pip install codecov
           poetry run codecov -f coverage.xml
