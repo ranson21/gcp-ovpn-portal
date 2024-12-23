@@ -80,7 +80,7 @@ steps:
         # Install git for codecov
         apt-get update && apt-get install -y git
 
-        export PATH="/builder/home/.local/bin:$PATH"
+        export PATH="/builder/home/.local/bin:$_PATH"
 
         # Install pytest and coverage dependencies
         pip install pytest pytest-cov
