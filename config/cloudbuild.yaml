@@ -58,19 +58,6 @@ steps:
     id: "update-version"
     waitFor: ["bump-version"]
 
-  # Install Poetry and dependencies
-  - name: "python:3.8"
-    entrypoint: "bash"
-    args:
-      - "-c"
-      - |
-        curl -sSL https://install.python-poetry.org | python3 -
-        export PATH="/builder/home/.local/bin:$_PATH"
-        poetry config virtualenvs.create false
-        poetry install
-    id: "install"
-    waitFor: ["update-version"]
-
   - name: "python:3.11"
     entrypoint: "bash"
     secretEnv: ["CODECOV_TOKEN"]
@@ -93,10 +80,23 @@ steps:
           echo $${CODECOV_TOKEN}
 
           poetry run python -m pip install codecov
-          poetry run codecov -f coverage.xml -t $${CODECOV_TOKEN}
+          poetry run codecov -f coverage.xml -t $${CODECOV_TOKEN} -R ${_REPO_OWNER}/gcp-ovpn-portal --verbose
         fi
     id: "test"
     waitFor: ["install"]
+
+  # Install Poetry and dependencies
+  - name: "python:3.8"
+    entrypoint: "bash"
+    args:
+      - "-c"
+      - |
+        curl -sSL https://install.python-poetry.org | python3 -
+        export PATH="/builder/home/.local/bin:$_PATH"
+        poetry config virtualenvs.create false
+        poetry install
+    id: "install"
+    waitFor: ["update-version"]
 
   # Build package
   - name: "python:3.8"
