@@ -173,6 +173,7 @@ availableSecrets:
       env: "CODECOV_TOKEN"
 
 substitutions:
+  _PATH: '\$PATH'
   _PR_TYPE: ""
   _REPO_OWNER: ""
   _IS_MERGE: "false"
