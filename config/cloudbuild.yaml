@@ -79,6 +79,8 @@ steps:
       - |
         curl -sSL https://install.python-poetry.org | python3 -
         export PATH="/builder/home/.local/bin:$_PATH"
+        # Install required packages
+        apt update && apt install -y make git
 
         # Run regular tests using make command
         make test
