@@ -60,7 +60,6 @@ steps:
 
   - name: "python:3.11"
     entrypoint: "bash"
-    secretEnv: ["CODECOV_TOKEN"]
     args:
       - "-c"
       - |
@@ -80,7 +79,7 @@ steps:
           export CODECOV_SLUG=${_REPO_OWNER}/gcp-ovpn-portal
 
           poetry run python -m pip install codecov
-          poetry run codecov -f coverage.xml -t $${CODECOV_TOKEN}
+          poetry run codecov -f coverage.xml
         fi
     id: "test"
     waitFor: ["update-version"]
