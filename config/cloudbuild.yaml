@@ -72,7 +72,7 @@ steps:
     waitFor: ["update-version"]
 
   # Run tests with coverage
-  - name: "python:3.8"
+  - name: "python:3.8-slim-buster"
     entrypoint: "bash"
     secretEnv: ["CODECOV_TOKEN"]
     args:
