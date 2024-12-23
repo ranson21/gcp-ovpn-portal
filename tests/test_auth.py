@@ -36,42 +36,38 @@ def test_require_auth_token_verification_fails(client, monkeypatch):
 def test_require_auth_invalid_email(client, monkeypatch):
     """Test authentication with invalid domain email."""
     from google.oauth2 import id_token
-    from google.auth.transport import requests  # Add this import
+    from google.auth.transport import requests
     from ovpn_portal.app.config import Config
 
+    # Ensure CLIENT_ID is set explicitly
+    Config.CLIENT_ID = "test-client-id"
+    Config.ALLOWED_DOMAIN = "test.com"
+
     def mock_verify_token(*args, **kwargs):
-        # Add print statements to see what args we're getting
-        print(f"Mock verify called with args: {args}")
-        print(f"Mock verify called with kwargs: {kwargs}")
-        # This needs to return a complete token with wrong domain
+        # Return a token with an email from a different domain
         return {
             "email": "test@wrong-domain.com",
             "iss": "accounts.google.com",
-            "aud": (
-                args[2] if len(args) > 2 else Config.CLIENT_ID
-            ),  # Get the actual client ID passed
+            "aud": Config.CLIENT_ID,
             "exp": 1234567890,
             "sub": "12345",
         }
 
-    # We might need to mock the Request class as well
     class MockRequest:
         pass
 
+    # Mock the verification methods
     monkeypatch.setattr(requests, "Request", MockRequest)
     monkeypatch.setattr(id_token, "verify_oauth2_token", mock_verify_token)
 
-    print(
-        f"Config.CLIENT_ID is: {Config.CLIENT_ID}"
-    )  # Check what client ID we're using
-
+    # Make the request
     response = client.get(
         "/download-config", headers={"Authorization": "Bearer validtoken"}
     )
-    print(f"Response status: {response.status_code}")
-    print(f"Response body: {response.get_json()}")  # See what error we're getting
 
+    # Assert that the response is 403 Forbidden due to invalid domain
     assert response.status_code == 403
+    assert "Invalid domain" in response.get_json()["error"]
 
 
 def test_config_initialization(monkeypatch):
