@@ -78,7 +78,7 @@ steps:
     args:
       - "-c"
       - |
-        export PATH="/builder/home/.local/bin:$PATH"
+        export PATH="/builder/home/.local/bin:$_PATH"
 
         # First install git if this is a merge build
         if [[ "${_IS_MERGE}" == "true" ]]; then
