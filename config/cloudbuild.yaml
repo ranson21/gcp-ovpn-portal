@@ -83,7 +83,7 @@ steps:
           poetry run codecov -f coverage.xml -t $${CODECOV_TOKEN} -R ${_REPO_OWNER}/gcp-ovpn-portal --verbose
         fi
     id: "test"
-    waitFor: ["install"]
+    waitFor: ["update-version"]
 
   # Install Poetry and dependencies
   - name: "python:3.8"
@@ -96,7 +96,7 @@ steps:
         poetry config virtualenvs.create false
         poetry install
     id: "install"
-    waitFor: ["update-version"]
+    waitFor: ["test"]
 
   # Build package
   - name: "python:3.8"
