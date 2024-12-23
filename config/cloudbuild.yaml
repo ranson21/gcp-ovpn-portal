@@ -78,23 +78,27 @@ steps:
     args:
       - "-c"
       - |
-        # Install git for codecov
-        apt-get update && apt-get install -y git
+        export PATH="/builder/home/.local/bin:$PATH"
 
-        export PATH="/builder/home/.local/bin:$_PATH"
+        # First install git if this is a merge build
+        if [[ "${_IS_MERGE}" == "true" ]]; then
+          apt-get update && apt-get install -y git
+        fi
 
-        # Install pytest and coverage dependencies
-        pip install pytest pytest-cov
+        # Run regular tests using make command
+        make test
 
-        # Run tests
-        poetry run pytest --cov=ovpn_portal --cov-report=xml --cov-report=term-missing tests/ -v
+        # If this is a merge, run coverage and upload
+        if [[ "${_IS_MERGE}" == "true" ]]; then
+          # Run coverage using make command
+          make coverage
 
-        # Upload coverage data
-        poetry run python -m pip install codecov
-        # Add required git info for codecov
-        git init
-        git remote add origin https://github.com/${_REPO_OWNER}/gcp-ovpn-portal.git
-        poetry run codecov -f coverage.xml -t $${CODECOV_TOKEN}
+          # Upload coverage data
+          poetry run python -m pip install codecov
+          git init
+          git remote add origin https://github.com/${_REPO_OWNER}/gcp-ovpn-portal.git
+          poetry run codecov -f coverage.xml -t $${CODECOV_TOKEN}
+        fi
     id: "test"
     waitFor: ["install"]
 
