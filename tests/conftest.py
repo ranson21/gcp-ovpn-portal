@@ -1,7 +1,37 @@
 import pytest
-from ovpn_portal.app import create_app
 import tempfile
 import os
+
+from ovpn_portal.app import create_app
+from ovpn_portal.app.config import Config
+
+
+@pytest.fixture
+def mock_openvpn_dir():
+    """Create temporary OpenVPN directory with mock certificates."""
+    with tempfile.TemporaryDirectory() as temp_dir:
+        # Create mock certificate files
+        cert_files = {
+            "ca.crt": "Mock CA Certificate",
+            "client.crt": "Mock Client Certificate",
+            "client.key": "Mock Client Key",
+            "ta.key": "Mock TLS Auth Key",
+        }
+
+        for filename, content in cert_files.items():
+            file_path = os.path.join(temp_dir, filename)
+            with open(file_path, "w") as f:
+                f.write(content)
+
+        # Store original directory
+        original_dir = Config.OPENVPN_DIR
+        # Set config to use temp directory
+        Config.OPENVPN_DIR = temp_dir
+
+        yield temp_dir
+
+        # Restore original directory
+        Config.OPENVPN_DIR = original_dir
 
 
 @pytest.fixture

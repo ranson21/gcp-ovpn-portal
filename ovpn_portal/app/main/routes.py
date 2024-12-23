@@ -89,7 +89,7 @@ def download_config(email):
         return_value = send_file(
             temp_path,
             as_attachment=True,
-            attachment_filename="client.ovpn",
+            download_name="client.ovpn",
             mimetype="application/x-openvpn-profile",
         )
 

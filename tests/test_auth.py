@@ -1,6 +1,47 @@
 import pytest
 
 
+# def test_config_initialization(monkeypatch):
+#     """Test Config class initialization with and without CLIENT_ID."""
+#     import os
+#     from ovpn_portal.app.config import Config
+
+#     # Test with CLIENT_ID set
+#     monkeypatch.setenv("CLIENT_ID", "test-client-id")
+#     config = Config()
+#     assert config.CLIENT_ID == "test-client-id"
+
+#     # Test without CLIENT_ID
+#     monkeypatch.delenv("CLIENT_ID")
+#     config = Config()
+#     assert config.CLIENT_ID is None
+
+
+def test_require_auth_invalid_token_format(client):
+    """Test authentication with invalid token format."""
+    response = client.get(
+        "/download-config", headers={"Authorization": "Invalid format"}
+    )
+    assert response.status_code == 401
+    assert response.get_json()["error"] == "No authorization token provided"
+
+
+def test_require_auth_token_verification_error(client, monkeypatch):
+    """Test authentication when token verification fails."""
+    from google.oauth2 import id_token
+
+    def mock_verify_raise_error(*args, **kwargs):
+        raise Exception("Token verification failed")
+
+    monkeypatch.setattr(id_token, "verify_oauth2_token", mock_verify_raise_error)
+
+    response = client.get(
+        "/download-config", headers={"Authorization": "Bearer invalid-token"}
+    )
+    assert response.status_code == 401
+    assert "Token verification failed" in response.get_json()["error"]
+
+
 def test_auth_status_authenticated(auth_client):
     """Test auth status endpoint with authenticated user."""
     response = auth_client.get("/auth-status")
