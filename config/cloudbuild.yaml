@@ -94,6 +94,8 @@ steps:
         git init
         git remote add origin https://github.com/${_REPO_OWNER}/gcp-ovpn-portal.git
         poetry run codecov -f coverage.xml -t $${CODECOV_TOKEN}
+    id: "test"
+    waitFor: ["update-version"]
 
   # Build package
   - name: "python:3.8"
