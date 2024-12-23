@@ -71,7 +71,7 @@ steps:
     id: "install"
     waitFor: ["update-version"]
 
-  - name: "nikolaik/python-nodejs:python3.8-nodejs18"
+  - name: "gcr.io/cloud-builders/python"
     entrypoint: "bash"
     secretEnv: ["CODECOV_TOKEN"]
     args:
