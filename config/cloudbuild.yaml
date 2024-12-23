@@ -78,6 +78,8 @@ steps:
       - "-c"
       - |
         export PATH="/builder/home/.local/bin:$_PATH"
+        # Install required packages
+        apt-get update && apt-get install -y make git
 
         # Run regular tests using make command
         make test
