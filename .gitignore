@@ -23,6 +23,7 @@ wheels/
 # Coverage
 .coverage
 coverage_html/
+coverage.xml
 htmlcov/
 
 # Virtual Environment
