@@ -9,7 +9,6 @@ class Config:
     ALLOWED_DOMAIN = os.environ.get("ALLOWED_DOMAIN")
     EXTERNAL_IP = os.environ.get("EXTERNAL_IP")
     OPENVPN_DIR = os.environ.get("OPENVPN_DIR", "/etc/openvpn")
-    print(os.environ.get("CLIENT_ID"))
 
     def __init__(self):
         print("Debug - Loading configuration:")

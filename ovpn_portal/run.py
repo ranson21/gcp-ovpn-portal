@@ -14,7 +14,7 @@ def main(test_config=None, test_mode=False):
     app = create_app(test_config)
     validate_config(app.config)
     if not test_mode:
-        app.run(host="localhost", port=8081)
+        app.run(host="localhost", port=8081)  # pragma: no cover
     return app
 
 
