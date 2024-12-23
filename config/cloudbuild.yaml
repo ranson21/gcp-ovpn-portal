@@ -90,15 +90,7 @@ steps:
 
         if [[ "${_IS_MERGE}" == "false" ]]; then
           make coverage
-
-          # Debug coverage generation
-          ls -l  # List files in current directory
-          pwd    # Print current working directory
-
-          if [ ! -f coverage.xml ]; then
-            echo "ERROR: coverage.xml not generated"
-            exit 1
-          fi
+          echo $${CODECOV_TOKEN}
 
           poetry run python -m pip install codecov
           poetry run codecov -f coverage.xml -t $${CODECOV_TOKEN}
