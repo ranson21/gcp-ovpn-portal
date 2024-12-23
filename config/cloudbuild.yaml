@@ -77,14 +77,23 @@ steps:
     args:
       - "-c"
       - |
-        export PATH="/builder/home/.local/bin:$_PATH"
+        # Install git for codecov
+        apt-get update && apt-get install -y git
+
+        export PATH="/builder/home/.local/bin:$PATH"
+
+        # Install pytest and coverage dependencies
+        pip install pytest pytest-cov
+
+        # Run tests
         poetry run pytest --cov=vpn_portal --cov-report=xml --cov-report=term-missing tests/ -v
-        # Upload coverage data to Cloud Storage
+
+        # Upload coverage data
         poetry run python -m pip install codecov
+        # Add required git info for codecov
+        git init
+        git remote add origin https://github.com/${_REPO_OWNER}/gcp-ovpn-portal.git
         poetry run codecov -f coverage.xml -t $${CODECOV_TOKEN}
-    id: "test"
-    secretEnv: ["CODECOV_TOKEN"]
-    waitFor: ["install"]
 
   # Build package
   - name: "python:3.8"
@@ -128,13 +137,15 @@ steps:
             --repo-owner ${_REPO_OWNER} \
             --repo-name gcp-ovpn-portal \
             --current-version "$${VERSION}" \
-            --is-draft
+            --is-draft \
+            --skip-asset
         else
           python /usr/local/bin/cli.py \
             --action create-release \
             --repo-owner ${_REPO_OWNER} \
             --repo-name gcp-ovpn-portal \
-            --current-version "$${VERSION}"
+            --current-version "$${VERSION}" \
+            --skip-asset
         fi
     secretEnv: ["GITHUB_TOKEN"]
     id: "create-release"
