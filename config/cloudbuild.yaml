@@ -74,6 +74,7 @@ steps:
   # Run tests with coverage
   - name: "python:3.8"
     entrypoint: "bash"
+    secretEnv: ["CODECOV_TOKEN"]
     args:
       - "-c"
       - |
