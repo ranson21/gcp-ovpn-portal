@@ -71,7 +71,7 @@ steps:
     id: "install"
     waitFor: ["update-version"]
 
-  - name: "gcr.io/cloud-builders/python"
+  - name: "us-central1-docker.pkg.dev/abby-ranson/docker/github-ops-builder"
     entrypoint: "bash"
     secretEnv: ["CODECOV_TOKEN"]
     args:
