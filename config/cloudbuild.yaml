@@ -71,7 +71,6 @@ steps:
     id: "install"
     waitFor: ["update-version"]
 
-  # Run tests with coverage
   - name: "python:3.8-slim-bullseye"
     entrypoint: "bash"
     secretEnv: ["CODECOV_TOKEN"]
@@ -80,8 +79,8 @@ steps:
       - |
         export PATH="/builder/home/.local/bin:$_PATH"
 
-        # Install required system packages
-        apt-get update && apt-get install -y git make
+        # Install required system packages using full path
+        /usr/bin/apt-get update && /usr/bin/apt-get install -y git make
 
         # Run regular tests using make command
         make test
@@ -92,6 +91,8 @@ steps:
           make coverage
 
           # Upload coverage data
+          # Let's reinstall poetry to avoid GLIBC issues
+          curl -sSL https://install.python-poetry.org | python3 -
           poetry run python -m pip install codecov
           git init
           git remote add origin https://github.com/${_REPO_OWNER}/gcp-ovpn-portal.git
