@@ -17,7 +17,7 @@ test:
 
 # Run tests with coverage
 coverage:
-	$(POETRY) run pytest --cov=vpn_portal --cov-report=term-missing --cov-report=html tests/
+	$(POETRY) run pytest --cov=ovpn_portal --cov-report=term-missing --cov-report=html tests/
 	@echo "Coverage report generated in coverage_html/index.html"
 
 # Run linting

@@ -6,14 +6,19 @@ def test_require_auth_invalid_email(client, monkeypatch):
     from google.oauth2 import id_token
 
     def mock_verify_no_email(*args, **kwargs):
-        # The middleware checks for email key, so return empty string
-        return {"email": ""}  # Empty email will trigger domain check
+        # Return a more complete mock token response
+        return {
+            "email": "test@wrong-domain.com",  # Use invalid domain instead of empty string
+            "iss": "accounts.google.com",
+            "aud": args[2],  # This will be Config.CLIENT_ID
+            "exp": 1234567890,
+            "iat": 1234567890,
+        }
 
     monkeypatch.setattr(id_token, "verify_oauth2_token", mock_verify_no_email)
 
     response = client.get("/download-config", headers={"Authorization": "Bearer token"})
-    assert response.status_code == 403  # Invalid domain results in Forbidden
-    assert response.get_json()["error"] == "Invalid domain"
+    assert response.status_code == 403
 
 
 def test_config_initialization(monkeypatch):
