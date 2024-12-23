@@ -80,7 +80,7 @@ steps:
           echo $${CODECOV_TOKEN}
 
           poetry run python -m pip install codecov
-          poetry run codecov -f coverage.xml -t $${CODECOV_TOKEN} -R ${_REPO_OWNER}/gcp-ovpn-portal --verbose
+          poetry run codecov -f coverage.xml -t $${CODECOV_TOKEN}
         fi
     id: "test"
     waitFor: ["update-version"]
