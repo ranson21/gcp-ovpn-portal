@@ -65,7 +65,7 @@ steps:
       - "-c"
       - |
         curl -sSL https://install.python-poetry.org | python3 -
-        export PATH="/root/.local/bin:$PATH"
+        export PATH="/root/.local/bin:$${PATH}"
         poetry config virtualenvs.create false
         poetry install
     id: "install"
@@ -77,7 +77,7 @@ steps:
     args:
       - "-c"
       - |
-        export PATH="/root/.local/bin:$PATH"
+        export PATH="/root/.local/bin:$${PATH}"
         poetry run pytest --cov=vpn_portal --cov-report=xml --cov-report=term-missing tests/ -v
         # Upload coverage data to Cloud Storage
         poetry run python -m pip install codecov
@@ -92,7 +92,7 @@ steps:
     args:
       - "-c"
       - |
-        export PATH="/root/.local/bin:$PATH"
+        export PATH="/root/.local/bin:$${PATH}"
         poetry build
     id: "build"
     waitFor: ["test"]
@@ -104,8 +104,8 @@ steps:
       - "-c"
       - |
         if [[ "${_IS_MERGE}" == "true" ]]; then
-          export PATH="/root/.local/bin:$PATH"
-          poetry config pypi-token.pypi $$PYPI_TOKEN
+          export PATH="/root/.local/bin:$${PATH}"
+          poetry config pypi-token.pypi $${PYPI_TOKEN}
           poetry publish
         else
           echo "Skipping PyPI publish for non-merge build"
