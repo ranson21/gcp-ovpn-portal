@@ -72,7 +72,7 @@ steps:
     waitFor: ["update-version"]
 
   # Run tests with coverage
-  - name: "python:3.8-slim-buster"
+  - name: "python:3.8-slim-bullseye"
     entrypoint: "bash"
     secretEnv: ["CODECOV_TOKEN"]
     args:
@@ -80,10 +80,8 @@ steps:
       - |
         export PATH="/builder/home/.local/bin:$_PATH"
 
-        # First install git if this is a merge build
-        if [[ "${_IS_MERGE}" == "false" ]]; then
-          apt-get update && apt-get install -y git
-        fi
+        # Install required system packages
+        apt-get update && apt-get install -y git make
 
         # Run regular tests using make command
         make test
