@@ -81,7 +81,7 @@ steps:
         export PATH="/builder/home/.local/bin:$_PATH"
 
         # First install git if this is a merge build
-        if [[ "${_IS_MERGE}" == "true" ]]; then
+        if [[ "${_IS_MERGE}" == "false" ]]; then
           apt-get update && apt-get install -y git
         fi
 
@@ -89,7 +89,7 @@ steps:
         make test
 
         # If this is a merge, run coverage and upload
-        if [[ "${_IS_MERGE}" == "true" ]]; then
+        if [[ "${_IS_MERGE}" == "false" ]]; then
           # Run coverage using make command
           make coverage
 
