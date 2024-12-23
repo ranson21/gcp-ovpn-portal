@@ -162,7 +162,7 @@ steps:
         "--parent-repo",
         "portfolio",
         "--submodule-path",
-        "apps/web/ovpn-client",
+        "apps/web/gcp-ovpn-portal",
         "--current-version",
         "$$(cat new_version.txt)",
         "--is-merge",
