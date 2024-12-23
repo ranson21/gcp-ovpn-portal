@@ -26,8 +26,8 @@ pip install ovpn-portal
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/ranson21/ovpn-client-web
-cd ovpn-client-web
+git clone https://github.com/ranson21/gcp-ovpn-portal
+cd gcp-ovpn-portal
 ```
 
 2. Install with Poetry:
