@@ -1,12 +1,7 @@
 from flask import Flask
 from flask_cors import CORS
 import os
-import sys
-
-if sys.version_info >= (3, 9):
-    from importlib.resources import files
-else:
-    from importlib_resources import files  # pragma: no cover
+from importlib.resources import files
 
 from .config import Config
 from .main import bp as main_bp
