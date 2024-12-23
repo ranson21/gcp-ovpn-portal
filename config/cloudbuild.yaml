@@ -79,8 +79,13 @@ steps:
       - |
         export PATH="/builder/home/.local/bin:$_PATH"
 
-        # Install required system packages using full path
-        /usr/bin/apt-get update && /usr/bin/apt-get install -y git make
+        # Install essential packages including gpg first
+        /usr/bin/apt-get update -y --allow-insecure-repositories
+        /usr/bin/apt-get install -y gpg apt-transport-https ca-certificates
+
+        # Now do a proper update and install required packages
+        /usr/bin/apt-get update
+        /usr/bin/apt-get install -y git make curl python3-pip
 
         # Run regular tests using make command
         make test
@@ -91,7 +96,7 @@ steps:
           make coverage
 
           # Upload coverage data
-          # Let's reinstall poetry to avoid GLIBC issues
+          # Install poetry fresh to avoid GLIBC issues
           curl -sSL https://install.python-poetry.org | python3 -
           poetry run python -m pip install codecov
           git init
