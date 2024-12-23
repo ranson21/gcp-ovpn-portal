@@ -71,7 +71,7 @@ steps:
     id: "install"
     waitFor: ["update-version"]
 
-  - name: "python:3.8"
+  - name: "python:3.8-bookworm"
     entrypoint: "bash"
     secretEnv: ["CODECOV_TOKEN"]
     args:
@@ -89,8 +89,6 @@ steps:
 
           # Upload coverage data
           poetry run python -m pip install codecov
-          git init
-          git remote add origin https://github.com/${_REPO_OWNER}/gcp-ovpn-portal.git
           poetry run codecov -f coverage.xml -t $${CODECOV_TOKEN}
         fi
     id: "test"
