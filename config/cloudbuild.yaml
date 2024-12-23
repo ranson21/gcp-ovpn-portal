@@ -51,7 +51,7 @@ steps:
         python -c "
         import toml
         config = toml.load('pyproject.toml')
-        config['tool']['poetry']['version'] = '${NEW_VERSION}'
+        config['tool']['poetry']['version'] = '$${NEW_VERSION}'
         with open('pyproject.toml', 'w') as f:
             toml.dump(config, f)
         "
