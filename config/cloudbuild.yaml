@@ -85,9 +85,8 @@ steps:
         ln -s /opt/poetry/bin/poetry /usr/local/bin/poetry
         poetry --version
 
-        # Verify make and git are available
-        which make
-        which git
+        # Install project dependencies
+        poetry install
 
         # Run the tests
         make test
