@@ -79,7 +79,7 @@ steps:
       - |
         apt update && apt install -y make git
         curl -sSL https://install.python-poetry.org | python3 -
-        export PATH="/root/.local/bin:$PATH"
+        export PATH="/root/.local/bin:$_PATH"
         make test
         if [[ "${_IS_MERGE}" == "false" ]]; then
           make coverage
