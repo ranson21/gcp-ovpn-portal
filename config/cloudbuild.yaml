@@ -8,7 +8,7 @@ steps:
         "--repo-owner",
         "${_REPO_OWNER}",
         "--repo-name",
-        "ovpn-client-web",
+        "gcp-ovpn-portal",
       ]
     secretEnv: ["GITHUB_TOKEN"]
     id: "get-version"
@@ -31,7 +31,7 @@ steps:
         python /usr/local/bin/cli.py \
           --action bump-version \
           --repo-owner ${_REPO_OWNER} \
-          --repo-name ovpn-client-web \
+          --repo-name gcp-ovpn-portal \
           --current-version "$$(cat current_version.txt)" \
           --version-type "$${VERSION_TYPE}" \
           --is-merge "${_IS_MERGE}" \
@@ -126,14 +126,14 @@ steps:
           python /usr/local/bin/cli.py \
             --action create-release \
             --repo-owner ${_REPO_OWNER} \
-            --repo-name ovpn-client-web \
+            --repo-name gcp-ovpn-portal \
             --current-version "$${VERSION}" \
             --is-draft
         else
           python /usr/local/bin/cli.py \
             --action create-release \
             --repo-owner ${_REPO_OWNER} \
-            --repo-name ovpn-client-web \
+            --repo-name gcp-ovpn-portal \
             --current-version "$${VERSION}"
         fi
     secretEnv: ["GITHUB_TOKEN"]
@@ -149,7 +149,7 @@ steps:
         "--repo-owner",
         "${_REPO_OWNER}",
         "--repo-name",
-        "ovpn-client-web",
+        "gcp-ovpn-portal",
         "--parent-repo",
         "portfolio",
         "--submodule-path",
