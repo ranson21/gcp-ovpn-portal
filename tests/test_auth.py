@@ -1,23 +1,76 @@
 import pytest
 
 
-def test_require_auth_invalid_email(client, monkeypatch):
-    """Test authentication with missing email in token."""
+def test_require_auth_no_token(client):
+    """Test authentication with no token."""
+    response = client.get("/download-config")  # No Authorization header
+    assert response.status_code == 401
+    assert response.json["error"] == "No authorization token provided"
+
+
+def test_require_auth_invalid_token_format(client):
+    """Test authentication with invalid token format."""
+    response = client.get(
+        "/download-config", headers={"Authorization": "NotBearer token"}
+    )
+    assert response.status_code == 401
+    assert response.json["error"] == "No authorization token provided"
+
+
+def test_require_auth_token_verification_fails(client, monkeypatch):
+    """Test authentication when token verification fails."""
     from google.oauth2 import id_token
 
-    def mock_verify_no_email(*args, **kwargs):
-        # Return a more complete mock token response
+    def mock_verify_token_fails(*args, **kwargs):
+        raise ValueError("Invalid token")
+
+    monkeypatch.setattr(id_token, "verify_oauth2_token", mock_verify_token_fails)
+
+    response = client.get(
+        "/download-config", headers={"Authorization": "Bearer invalidtoken"}
+    )
+    assert response.status_code == 401
+    assert "Invalid token" in response.json["error"]
+
+
+def test_require_auth_invalid_email(client, monkeypatch):
+    """Test authentication with invalid domain email."""
+    from google.oauth2 import id_token
+    from google.auth.transport import requests  # Add this import
+    from ovpn_portal.app.config import Config
+
+    def mock_verify_token(*args, **kwargs):
+        # Add print statements to see what args we're getting
+        print(f"Mock verify called with args: {args}")
+        print(f"Mock verify called with kwargs: {kwargs}")
+        # This needs to return a complete token with wrong domain
         return {
-            "email": "test@wrong-domain.com",  # Use invalid domain instead of empty string
+            "email": "test@wrong-domain.com",
             "iss": "accounts.google.com",
-            "aud": args[2],  # This will be Config.CLIENT_ID
+            "aud": (
+                args[2] if len(args) > 2 else Config.CLIENT_ID
+            ),  # Get the actual client ID passed
             "exp": 1234567890,
-            "iat": 1234567890,
+            "sub": "12345",
         }
 
-    monkeypatch.setattr(id_token, "verify_oauth2_token", mock_verify_no_email)
+    # We might need to mock the Request class as well
+    class MockRequest:
+        pass
 
-    response = client.get("/download-config", headers={"Authorization": "Bearer token"})
+    monkeypatch.setattr(requests, "Request", MockRequest)
+    monkeypatch.setattr(id_token, "verify_oauth2_token", mock_verify_token)
+
+    print(
+        f"Config.CLIENT_ID is: {Config.CLIENT_ID}"
+    )  # Check what client ID we're using
+
+    response = client.get(
+        "/download-config", headers={"Authorization": "Bearer validtoken"}
+    )
+    print(f"Response status: {response.status_code}")
+    print(f"Response body: {response.get_json()}")  # See what error we're getting
+
     assert response.status_code == 403
 
 
