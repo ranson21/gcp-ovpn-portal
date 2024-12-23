@@ -49,13 +49,13 @@ build:
 
 # Publish to Test PyPI
 publish-test:
-	$(POETRY) config pypi-token.pypi $$PYPI_TOKEN
+	$(POETRY) config pypi-token.testpypi ${TEST_PYPI_TOKEN}
 	$(POETRY) config repositories.testpypi https://test.pypi.org/legacy/
 	$(POETRY) publish -r testpypi
 
 # Publish to PyPI
 publish:
-	$(POETRY) config pypi-token.pypi $$PYPI_TOKEN
+	$(POETRY) config pypi-token.pypi ${TEST_PYPI_TOKEN}
 	$(POETRY) publish
 
 # Setup local development environment
