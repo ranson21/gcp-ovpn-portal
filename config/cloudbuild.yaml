@@ -81,7 +81,7 @@ steps:
         poetry run pytest --cov=vpn_portal --cov-report=xml --cov-report=term-missing tests/ -v
         # Upload coverage data to Cloud Storage
         poetry run python -m pip install codecov
-        poetry run codecov -f coverage.xml -t $CODECOV_TOKEN
+        poetry run codecov -f coverage.xml -t $${CODECOV_TOKEN}
     id: "test"
     secretEnv: ["CODECOV_TOKEN"]
     waitFor: ["install"]
