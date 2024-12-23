@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "ovpn-portal"
+name = "gcp-ovpn-portal"
 version = "0.0.0"
 description = "A secure OpenVPN authentication portal with Google OAuth2"
 authors = ["Abigail Ranson <abby@abbyranson.com>"]

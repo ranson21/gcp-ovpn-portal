@@ -73,14 +73,10 @@ steps:
         poetry install
 
         # Run the tests
-        make test
+        make coverage
 
-        if [[ "${_IS_MERGE}" == "true" ]]; then
-          make coverage
-
-          poetry run python -m pip install codecov
-          poetry run codecov -f coverage.xml
-        fi
+        poetry run python -m pip install codecov
+        poetry run codecov -f coverage.xml
     id: "test"
     waitFor: ["update-version"]
 

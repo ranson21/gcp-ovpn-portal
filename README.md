@@ -19,7 +19,7 @@ A secure, user-friendly authentication portal for OpenVPN configuration distribu
 ### Via pip
 
 ```bash
-pip install ovpn-portal
+pip install gcp-ovpn-portal
 ```
 
 ### Development Setup
@@ -105,23 +105,24 @@ make run
 
 ```
 openvpn-auth-portal/
-├── vpn_portal/
-│   ├── __init__.py
+├── ovpn_portal/
 │   ├── app/
-│   │   ├── routes.py
-│   │   ├── auth.py
+│   │   ├── main/
+|   │   │   ├── __init__.py
+|   │   │   └── routes.py
+│   │   ├── __init__.py
+│   │   ├── config.py
+│   │   ├── middleware.py
 │   │   └── vpn.py
 │   └── run.py
 ├── static/
 │   ├── css/
-│   │   └── style.css
+│   ├── images/
 │   ├── js/
-│   │   └── main.js
 │   └── favicon.ico
 ├── templates/
 │   └── index.html
 ├── tests/
-│   └── test_app.py
 ├── pyproject.toml
 ├── .env.example
 ├── .gitignore
