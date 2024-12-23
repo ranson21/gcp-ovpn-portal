@@ -81,11 +81,11 @@ steps:
 
         # Install essential packages including gpg first
         /usr/bin/apt-get update -y --allow-insecure-repositories
-        /usr/bin/apt-get install -y gpg apt-transport-https ca-certificates
+        /usr/bin/apt-get install -y gpg apt-transport-https ca-certificates --allow-unauthenticated
 
         # Now do a proper update and install required packages
         /usr/bin/apt-get update
-        /usr/bin/apt-get install -y git make curl python3-pip
+        /usr/bin/apt-get install -y git make curl python3-pip --allow-unauthenticated
 
         # Run regular tests using make command
         make test
