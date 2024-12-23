@@ -77,7 +77,7 @@ steps:
 
         if [[ "${_IS_MERGE}" == "false" ]]; then
           make coverage
-          echo $${CODECOV_TOKEN}
+          export CODECOV_SLUG=${_REPO_OWNER}/gcp-ovpn-portal
 
           poetry run python -m pip install codecov
           poetry run codecov -f coverage.xml -t $${CODECOV_TOKEN}
@@ -107,7 +107,7 @@ steps:
         export PATH="/builder/home/.local/bin:$_PATH"
         poetry build
     id: "build"
-    waitFor: ["test"]
+    waitFor: ["install"]
 
   # Publish to PyPI if this is a merge to main
   - name: "python:3.8"
