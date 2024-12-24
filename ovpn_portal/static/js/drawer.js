@@ -347,7 +347,6 @@ const NetworkMetrics = ({ isConnected, clientIp }) => {
         const locationData = await locationResponse.json();
         const latencyValue = Math.round(performance.now() - start);
         const quality = getConnectionQuality(latencyValue);
-        console.log("locationData", locationData);
 
         // Map ip-api.com response format to our expected format
         setMetrics({
