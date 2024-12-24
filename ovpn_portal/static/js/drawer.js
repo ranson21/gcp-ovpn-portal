@@ -1,4 +1,585 @@
-// drawer.js
+const ConnectionDiagnostics = ({ isConnected }) => {
+  const [diagnostics, setDiagnostics] = React.useState({
+    dns: { status: "pending", latency: null },
+    connectivity: { status: "pending", details: [] },
+    stability: {
+      status: "pending",
+      samples: [],
+      drops: 0,
+      averageLatency: null,
+    },
+  });
+
+  // Test DNS resolution
+  const checkDNS = async () => {
+    const domains = ["google.com", "amazon.com", "microsoft.com"];
+    const results = [];
+
+    for (const domain of domains) {
+      const start = performance.now();
+      try {
+        await fetch(`https://${domain}/favicon.ico`, { mode: "no-cors" });
+        const latency = performance.now() - start;
+        results.push({ success: true, latency });
+      } catch (error) {
+        results.push({ success: false, latency: null });
+      }
+    }
+
+    const successCount = results.filter((r) => r.success).length;
+    const avgLatency =
+      results
+        .filter((r) => r.success)
+        .reduce((acc, curr) => acc + curr.latency, 0) / successCount || 0;
+
+    return {
+      status: successCount >= 2 ? "healthy" : "issue",
+      latency: Math.round(avgLatency),
+    };
+  };
+
+  // Basic connectivity check
+  const checkConnectivity = async () => {
+    const checks = [
+      { name: "VPN Endpoint", url: "/health" },
+      {
+        name: "DNS Resolution",
+        url: "https://1.1.1.1/favicon.ico",
+        mode: "no-cors",
+      },
+      {
+        name: "External Access",
+        url: "https://www.google.com/favicon.ico",
+        mode: "no-cors",
+      },
+    ];
+
+    const results = [];
+    for (const check of checks) {
+      try {
+        const start = performance.now();
+        await fetch(check.url, check.mode ? { mode: check.mode } : {});
+        results.push({
+          name: check.name,
+          status: "success",
+          latency: Math.round(performance.now() - start),
+        });
+      } catch (error) {
+        results.push({
+          name: check.name,
+          status: "failed",
+          error: error.message,
+        });
+      }
+    }
+
+    return {
+      status: results.every((r) => r.status === "success")
+        ? "healthy"
+        : "issue",
+      details: results,
+    };
+  };
+
+  // Monitor connection stability
+  const monitorStability = async () => {
+    const sampleSize = 5;
+    const samples = [];
+    let drops = 0;
+
+    for (let i = 0; i < sampleSize; i++) {
+      try {
+        const start = performance.now();
+        await fetch("/health");
+        samples.push(performance.now() - start);
+      } catch (error) {
+        drops++;
+        samples.push(null);
+      }
+      // Small delay between samples
+      await new Promise((resolve) => setTimeout(resolve, 200));
+    }
+
+    const validSamples = samples.filter((s) => s !== null);
+    const averageLatency = validSamples.length
+      ? Math.round(
+          validSamples.reduce((a, b) => a + b, 0) / validSamples.length
+        )
+      : null;
+
+    return {
+      status: drops <= 1 ? "stable" : drops <= 2 ? "unstable" : "poor",
+      samples: samples,
+      drops: drops,
+      averageLatency,
+    };
+  };
+
+  // Run all diagnostics
+  const runDiagnostics = async () => {
+    setDiagnostics((prev) => ({
+      ...prev,
+      dns: { ...prev.dns, status: "checking" },
+      connectivity: { ...prev.connectivity, status: "checking" },
+      stability: { ...prev.stability, status: "checking" },
+    }));
+
+    const [dnsResults, connectivityResults, stabilityResults] =
+      await Promise.all([checkDNS(), checkConnectivity(), monitorStability()]);
+
+    setDiagnostics({
+      dns: dnsResults,
+      connectivity: connectivityResults,
+      stability: stabilityResults,
+    });
+  };
+
+  // Run diagnostics on mount and when connection status changes
+  React.useEffect(() => {
+    runDiagnostics();
+    const interval = setInterval(runDiagnostics, 60000); // Run every minute
+    return () => clearInterval(interval);
+  }, [isConnected]);
+
+  // Helper for status indicators
+  const StatusIndicator = ({ status, text }) => {
+    const getStatusColor = (status) => {
+      switch (status) {
+        case "healthy":
+        case "stable":
+          return "bg-green-500";
+        case "unstable":
+        case "issue":
+          return "bg-yellow-500";
+        case "poor":
+          return "bg-red-500";
+        case "checking":
+          return "bg-blue-500 animate-pulse";
+        default:
+          return "bg-gray-500";
+      }
+    };
+
+    return React.createElement(
+      "div",
+      {
+        className: "flex items-center space-x-2",
+      },
+      [
+        React.createElement("div", {
+          className: `h-2 w-2 rounded-full ${getStatusColor(status)}`,
+        }),
+        React.createElement(
+          "span",
+          {
+            className: "text-sm",
+          },
+          text
+        ),
+      ]
+    );
+  };
+
+  return React.createElement(
+    "div",
+    {
+      className: "bg-white rounded-lg shadow-sm p-4 mb-4",
+    },
+    [
+      // Header
+      React.createElement(
+        "div",
+        {
+          className: "flex items-center justify-between mb-4",
+          key: "header",
+        },
+        [
+          React.createElement(
+            "h3",
+            {
+              className: "text-sm font-medium text-gray-800 max-w-24",
+            },
+            "Connection Diagnostics"
+          ),
+          diagnostics.dns.status === "checking"
+            ? React.createElement("div", { className: "flex" }, [
+                React.createElement(
+                  "span",
+                  { className: "text-xs text-blue-600 mr-2" },
+                  "Running Tests..."
+                ),
+
+                React.createElement("div", {
+                  className:
+                    "animate-spin rounded-full h-4 w-4 border-2 border-gray-300 border-t-gray-600",
+                }),
+              ])
+            : React.createElement(
+                "button",
+                {
+                  className:
+                    "text-xs text-blue-600 hover:text-blue-800 text-right",
+                  onClick: runDiagnostics,
+                },
+                "Run Tests"
+              ),
+        ]
+      ),
+
+      // DNS Status
+      React.createElement(
+        "div",
+        {
+          className: "mb-3",
+          key: "dns",
+        },
+        [
+          React.createElement(StatusIndicator, {
+            status: diagnostics.dns.status,
+            text: `DNS Resolution: ${
+              diagnostics.dns.status === "checking"
+                ? "Checking..."
+                : diagnostics.dns.status === "healthy"
+                ? `Healthy (${diagnostics.dns.latency}ms)`
+                : "Issues Detected"
+            }`,
+          }),
+        ]
+      ),
+
+      // Connectivity Status
+      React.createElement(
+        "div",
+        {
+          className: "mb-3",
+          key: "connectivity",
+        },
+        [
+          React.createElement(StatusIndicator, {
+            status: diagnostics.connectivity.status,
+            text: `Connectivity: ${
+              diagnostics.connectivity.status === "checking"
+                ? "Checking..."
+                : diagnostics.connectivity.status === "healthy"
+                ? "All Services Reachable"
+                : "Some Services Unreachable"
+            }`,
+          }),
+          diagnostics.connectivity.details.map((detail, index) =>
+            React.createElement(
+              "div",
+              {
+                className: "ml-4 text-xs text-gray-500 mt-1",
+                key: `detail-${index}`,
+              },
+              `${detail.name}: ${
+                detail.status === "success" ? `${detail.latency}ms` : "Failed"
+              }`
+            )
+          ),
+        ]
+      ),
+
+      // Stability Status
+      React.createElement(
+        "div",
+        {
+          className: "mb-3",
+          key: "stability",
+        },
+        [
+          React.createElement(StatusIndicator, {
+            status: diagnostics.stability.status,
+            text: `Connection Stability: ${
+              diagnostics.stability.status === "checking"
+                ? "Checking..."
+                : diagnostics.stability.status === "stable"
+                ? `Stable (avg ${diagnostics.stability.averageLatency}ms)`
+                : diagnostics.stability.status === "unstable"
+                ? "Minor Issues Detected"
+                : "Unstable Connection"
+            }`,
+          }),
+          diagnostics.stability.drops > 0 &&
+            React.createElement(
+              "div",
+              {
+                className: "ml-4 text-xs text-gray-500 mt-1",
+              },
+              `Packet Loss: ${((diagnostics.stability.drops / 5) * 100).toFixed(
+                1
+              )}%`
+            ),
+        ]
+      ),
+    ]
+  );
+};
+
+// NetworkMetrics component within the same file
+const NetworkMetrics = ({ isConnected, clientIp }) => {
+  const [metrics, setMetrics] = React.useState({
+    location: { city: "Loading...", country: "...", region: "", loading: true },
+    latency: { value: null, loading: true },
+    connectionQuality: { status: "checking", loading: true },
+  });
+
+  // Helper function to determine connection quality based on latency
+  const getConnectionQuality = (latency) => {
+    if (!latency) return { status: "unknown", color: "gray" };
+    if (latency < 50) return { status: "Excellent", color: "green" };
+    if (latency < 100) return { status: "Good", color: "green" };
+    if (latency < 200) return { status: "Fair", color: "yellow" };
+    return { status: "Poor", color: "red" };
+  };
+
+  React.useEffect(() => {
+    const fetchMetrics = async () => {
+      try {
+        const start = performance.now();
+
+        // Try ip-api.com instead of ipapi.co (more generous rate limits)
+        const locationResponse = await fetch("http://ip-api.com/json/");
+        if (!locationResponse.ok) {
+          throw new Error("Location API request failed");
+        }
+
+        const locationData = await locationResponse.json();
+        const latencyValue = Math.round(performance.now() - start);
+        const quality = getConnectionQuality(latencyValue);
+
+        // Map ip-api.com response format to our expected format
+        setMetrics({
+          location: {
+            city: locationData.city,
+            region: locationData.region,
+            country: locationData.country,
+            isp: locationData.isp,
+            loading: false,
+          },
+          latency: {
+            value: latencyValue,
+            loading: false,
+          },
+          connectionQuality: {
+            status: quality.status,
+            color: quality.color,
+            loading: false,
+          },
+        });
+      } catch (error) {
+        console.error("Error fetching metrics:", error);
+        // Set error state but keep trying
+        setMetrics((prev) => ({
+          ...prev,
+          location: {
+            city: "Error loading",
+            region: "Unkown",
+            country: "Unknown",
+            isp: "Unknown",
+            loading: false,
+          },
+          latency: {
+            value: null,
+            loading: false,
+          },
+          connectionQuality: {
+            status: "unknown",
+            color: "gray",
+            loading: false,
+          },
+        }));
+      }
+    };
+
+    fetchMetrics();
+    const interval = setInterval(fetchMetrics, 10000);
+    return () => clearInterval(interval);
+  }, [isConnected]);
+
+  return React.createElement(
+    "div",
+    {
+      className: "bg-white rounded-lg shadow-sm p-4 mb-4",
+    },
+    [
+      // Connection Status
+      React.createElement(
+        "div",
+        {
+          className: "mb-4 border-b border-gray-100 pb-4",
+          key: "connection-status",
+        },
+        [
+          React.createElement(
+            "div",
+            {
+              className: "flex items-center justify-between mb-2",
+            },
+            [
+              React.createElement(
+                "h3",
+                {
+                  className: "text-sm font-medium text-gray-800",
+                },
+                "Connection Status"
+              ),
+              React.createElement(
+                "span",
+                {
+                  className: `px-2 py-1 text-xs rounded-full ${
+                    isConnected
+                      ? "bg-green-100 text-green-800"
+                      : "bg-gray-100 text-gray-800"
+                  }`,
+                },
+                isConnected ? "Connected" : "Not Connected"
+              ),
+            ]
+          ),
+
+          // Connection Quality
+          !metrics.connectionQuality.loading &&
+            React.createElement(
+              "div",
+              {
+                className: "flex items-center mt-2 justify-between",
+              },
+              [
+                React.createElement(
+                  "span",
+                  {
+                    className: "text-sm text-gray-600 mr-2",
+                  },
+                  "Connection Quality:"
+                ),
+                React.createElement(
+                  "span",
+                  {
+                    className: `text-sm font-medium text-right ${
+                      metrics.connectionQuality.color === "green"
+                        ? "text-green-600"
+                        : metrics.connectionQuality.color === "yellow"
+                        ? "text-yellow-600"
+                        : metrics.connectionQuality.color === "red"
+                        ? "text-red-600"
+                        : "text-gray-600"
+                    }`,
+                  },
+                  metrics.connectionQuality.status
+                ),
+              ]
+            ),
+        ]
+      ),
+
+      // Connection Details
+      React.createElement(
+        "div",
+        {
+          className: "space-y-3",
+          key: "connection-details",
+        },
+        [
+          // Current Location
+          React.createElement(
+            "div",
+            {
+              className: "flex justify-between items-center text-sm",
+            },
+            [
+              React.createElement(
+                "span",
+                { className: "text-gray-600" },
+                "Location"
+              ),
+              React.createElement(
+                "span",
+                { className: "font-medium text-right max-w-28" },
+                metrics.location.loading
+                  ? "Loading..."
+                  : `${metrics.location.city}, ${metrics.location.region} ${metrics.location.country}`
+              ),
+            ]
+          ),
+
+          // ISP Info
+          React.createElement(
+            "div",
+            {
+              className: "flex justify-between items-center text-sm",
+            },
+            [
+              React.createElement(
+                "span",
+                { className: "text-gray-600 max-w-24" },
+                "Network Provider"
+              ),
+              React.createElement(
+                "span",
+                { className: "font-medium text-right max-w-28" },
+                metrics.location.loading
+                  ? "Loading..."
+                  : metrics.location.isp || "Unknown"
+              ),
+            ]
+          ),
+
+          // IP Address
+          React.createElement(
+            "div",
+            {
+              className: "flex justify-between items-center text-sm",
+            },
+            [
+              React.createElement(
+                "span",
+                { className: "text-gray-600" },
+                "IP Address"
+              ),
+              React.createElement(
+                "span",
+                { className: "font-medium" },
+                clientIp || "Unknown"
+              ),
+            ]
+          ),
+
+          // Response Time
+          React.createElement(
+            "div",
+            {
+              className: "flex justify-between items-center text-sm",
+            },
+            [
+              React.createElement(
+                "span",
+                { className: "text-gray-600" },
+                "Response Time"
+              ),
+              React.createElement(
+                "span",
+                {
+                  className: `font-medium ${
+                    metrics.latency.value < 100
+                      ? "text-green-600"
+                      : metrics.latency.value < 200
+                      ? "text-yellow-600"
+                      : "text-red-600"
+                  }`,
+                },
+                metrics.latency.loading
+                  ? "Loading..."
+                  : `${metrics.latency.value}ms`
+              ),
+            ]
+          ),
+        ]
+      ),
+    ]
+  );
+};
+
 export const VPNDrawer = () => {
   const [isAuthenticated, setIsAuthenticated] = React.useState(false);
   const [authToken, setAuthToken] = React.useState(null);
@@ -196,7 +777,7 @@ export const VPNDrawer = () => {
     "div",
     {
       className:
-        "w-64 h-screen bg-gray-50 border-r border-gray-200 p-6 fixed left-0 top-0",
+        "w-128 h-screen bg-gray-50 border-r border-gray-200 p-6 fixed left-0 top-0",
     },
     React.createElement(
       "div",
@@ -261,6 +842,47 @@ export const VPNDrawer = () => {
               )
             ),
           ]
+        ),
+
+        // Auth Section
+        React.createElement(
+          "div",
+          {
+            className: "space-y-4 mb-6",
+            key: "auth",
+          },
+          React.createElement(
+            "div",
+            {
+              className:
+                "bg-white p-4 rounded-lg shadow-sm border border-gray-200",
+            },
+            [
+              React.createElement(
+                "div",
+                {
+                  className: "text-sm font-medium text-gray-800 mb-2",
+                  key: "auth-title",
+                },
+                "Authentication"
+              ),
+              React.createElement(
+                "div",
+                {
+                  className: "text-xs text-gray-600 mb-4",
+                  key: "auth-status",
+                },
+                isAuthenticated
+                  ? `Signed in: ${authEmail}`
+                  : "Not authenticated"
+              ),
+            ]
+          ),
+          React.createElement("div", {
+            id: "signInDiv",
+            className: "w-full scale-90",
+            key: "sign-in",
+          })
         ),
 
         // Status Card
@@ -373,141 +995,22 @@ export const VPNDrawer = () => {
                 ),
               ]
             ),
-            // VPN Connection Status
-            React.createElement(
-              "div",
-              {
-                className:
-                  "flex items-center justify-between text-sm text-gray-600 border-t border-gray-100 pt-4 mt-4",
-                key: "vpn-status",
-              },
-              [
-                React.createElement("span", null, "VPN Connection"),
-                React.createElement(
-                  "div",
-                  {
-                    className: "flex items-center space-x-1",
-                  },
-                  vpnStatus.loading
-                    ? [
-                        React.createElement("div", {
-                          className:
-                            "animate-spin rounded-full h-4 w-4 border-2 border-gray-300 border-t-gray-600",
-                        }),
-                        React.createElement(
-                          "span",
-                          {
-                            className: "text-gray-600",
-                          },
-                          "Checking..."
-                        ),
-                      ]
-                    : [
-                        React.createElement(
-                          "svg",
-                          {
-                            className: `h-4 w-4 ${
-                              vpnStatus.connected
-                                ? "text-green-500"
-                                : "text-red-500"
-                            }`,
-                            viewBox: "0 0 24 24",
-                            fill: "none",
-                            stroke: "currentColor",
-                            strokeWidth: "2",
-                          },
-                          vpnStatus.connected
-                            ? React.createElement("polyline", {
-                                points: "20 6 9 17 4 12",
-                              })
-                            : React.createElement("line", {
-                                x1: "18",
-                                y1: "6",
-                                x2: "6",
-                                y2: "18",
-                              })
-                        ),
-                        React.createElement(
-                          "span",
-                          {
-                            className: vpnStatus.connected
-                              ? "text-green-600"
-                              : "text-red-600",
-                          },
-                          vpnStatus.connected ? "Connected" : "Disconnected"
-                        ),
-                      ]
-                ),
-              ]
-            ),
-            vpnStatus.clientIp &&
-              React.createElement(
-                "div",
-                {
-                  className: "text-xs text-gray-500 mt-2",
-                  key: "client-ip",
-                },
-                [
-                  React.createElement(
-                    "div",
-                    { key: "current-ip" },
-                    `Current IP: ${vpnStatus.clientIp}`
-                  ),
-                  window.location.hostname === "localhost" &&
-                    vpnStatus.allIps &&
-                    React.createElement(
-                      "div",
-                      {
-                        className: "text-xs mt-1 text-gray-400",
-                        key: "all-ips",
-                      },
-                      `All IPs: ${vpnStatus.allIps.join(", ")}`
-                    ),
-                ]
-              ),
           ]
         ),
 
-        // Auth Section
-        React.createElement(
-          "div",
-          {
-            className: "space-y-4",
-            key: "auth",
-          },
-          React.createElement(
-            "div",
-            {
-              className:
-                "bg-white p-4 rounded-lg shadow-sm border border-gray-200",
-            },
-            [
-              React.createElement(
-                "div",
-                {
-                  className: "text-sm font-medium text-gray-800 mb-2",
-                  key: "auth-title",
-                },
-                "Authentication"
-              ),
-              React.createElement(
-                "div",
-                {
-                  className: "text-xs text-gray-600 mb-4",
-                  key: "auth-status",
-                },
-                isAuthenticated
-                  ? `Signed in: ${authEmail}`
-                  : "Not authenticated"
-              ),
-              React.createElement("div", {
-                id: "signInDiv",
-                className: "w-full scale-90 origin-left",
-                key: "sign-in",
-              }),
-            ]
-          )
-        ),
+        // Network Metrics
+        React.createElement(NetworkMetrics, {
+          isConnected: vpnStatus.connected,
+          clientIp: vpnStatus.clientIp,
+          key: "network-metrics",
+        }),
+
+        // Connection Diagnostics (only show when connected)
+        vpnStatus.connected &&
+          React.createElement(ConnectionDiagnostics, {
+            isConnected: vpnStatus.connected,
+            key: "connection-diagnostics",
+          }),
 
         // Download Button
         React.createElement(

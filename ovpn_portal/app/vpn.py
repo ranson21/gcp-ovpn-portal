@@ -30,6 +30,12 @@ down /etc/openvpn/update-systemd-resolved
 down-pre
 pull-filter ignore "route-ipv6"
 pull-filter ignore "ifconfig-ipv6"
+mssfix 1400
+socket-flags TCP_NODELAY
+sndbuf 0
+rcvbuf 0
+ncp-ciphers AES-256-GCM:AES-128-GCM
+fast-io
 
 <ca>
 {open(os.path.join(Config.OPENVPN_DIR, 'ca.crt')).read()}
