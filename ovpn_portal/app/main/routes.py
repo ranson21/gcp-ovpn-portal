@@ -1,3 +1,4 @@
+from ovpn_portal.version import get_version
 from flask import (
     render_template,
     jsonify,
@@ -138,4 +139,4 @@ def vpn_status():
 
 @bp.route("/health")
 def health_check():
-    return jsonify({"status": "healthy"}), 200
+    return jsonify({"status": "healthy", "version": get_version()}), 200
