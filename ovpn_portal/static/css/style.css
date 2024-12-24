@@ -31,6 +31,10 @@ body {
   align-items: flex-start;
 }
 
+.w-128 {
+  width: 333px !important;
+}
+
 .container {
   max-width: 600px;
   margin: 20px;
@@ -60,12 +64,9 @@ body {
 
 /* Main Content Area */
 .main-content {
-  margin-left: 250px;
+  margin-left: 450px;
   padding: 2rem;
   flex: 1;
-  max-width: 1200px;
-  margin: 0 auto;
-  margin-left: 250px;
   padding: 2rem 4rem;
 }
 
