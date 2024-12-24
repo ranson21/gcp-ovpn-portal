@@ -2,5 +2,6 @@ include LICENSE
 include README.md
 recursive-include ovpn_portal/static *
 recursive-include ovpn_portal/templates *
+recursive-include ovpn_portal *
 recursive-exclude * __pycache__
 recursive-exclude * *.py[co]
