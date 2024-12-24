@@ -1,6 +1,6 @@
 # 🔐 OpenVPN Authentication Portal
 
-[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/) [![Flask](https://img.shields.io/badge/flask-2.0+-green.svg)](https://flask.palletsprojects.com/) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![codecov](https://codecov.io/gh/ranson21/ovpn-portal/branch/main/graph/badge.svg)](https://codecov.io/gh/ranson21/ovpn-portal) [![Code Coverage](https://img.shields.io/badge/coverage-90%25-brightgreen.svg)](https://codecov.io/gh/ranson21/ovpn-portal)
+[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/) [![Flask](https://img.shields.io/badge/flask-2.0+-green.svg)](https://flask.palletsprojects.com/) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![codecov](https://codecov.io/gh/ranson21/gcp-ovpn-portal/graph/badge.svg?token=PF2CC5F6FL)](https://codecov.io/gh/ranson21/gcp-ovpn-portal)
 
 A secure, user-friendly authentication portal for OpenVPN configuration distribution. This application provides Google OAuth2 authentication and domain-restricted access to OpenVPN configuration files.
 
