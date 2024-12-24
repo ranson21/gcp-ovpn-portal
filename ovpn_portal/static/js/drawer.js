@@ -319,7 +319,7 @@ const ConnectionDiagnostics = ({ isConnected }) => {
 // NetworkMetrics component within the same file
 const NetworkMetrics = ({ isConnected, clientIp }) => {
   const [metrics, setMetrics] = React.useState({
-    location: { city: "Loading...", country: "...", loading: true },
+    location: { city: "Loading...", country: "...", region: "", loading: true },
     latency: { value: null, loading: true },
     connectionQuality: { status: "checking", loading: true },
   });
@@ -347,11 +347,13 @@ const NetworkMetrics = ({ isConnected, clientIp }) => {
         const locationData = await locationResponse.json();
         const latencyValue = Math.round(performance.now() - start);
         const quality = getConnectionQuality(latencyValue);
+        console.log("locationData", locationData);
 
         // Map ip-api.com response format to our expected format
         setMetrics({
           location: {
             city: locationData.city,
+            region: locationData.region,
             country: locationData.country,
             isp: locationData.isp,
             loading: false,
@@ -373,6 +375,7 @@ const NetworkMetrics = ({ isConnected, clientIp }) => {
           ...prev,
           location: {
             city: "Error loading",
+            region: "Unkown",
             country: "Unknown",
             isp: "Unknown",
             loading: false,
@@ -496,7 +499,7 @@ const NetworkMetrics = ({ isConnected, clientIp }) => {
                 { className: "font-medium text-right max-w-28" },
                 metrics.location.loading
                   ? "Loading..."
-                  : `${metrics.location.city}, ${metrics.location.country}`
+                  : `${metrics.location.city}, ${metrics.location.region} ${metrics.location.country}`
               ),
             ]
           ),
