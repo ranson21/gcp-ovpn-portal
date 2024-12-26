@@ -5,14 +5,19 @@ from importlib.resources import files
 
 from .config import Config
 from .main import bp as main_bp
+from pathlib import Path
+
+base_path = Path(__file__).resolve().parent
+static_folder = base_path / "static"
+template_folder = base_path / "templates"
 
 
 def create_app(test_config=None):
     # Create Flask app with package-aware static and template folders
     app = Flask(
         __name__,
-        static_folder=str(files("ovpn_portal") / "static"),
-        template_folder=str(files("ovpn_portal") / "templates"),
+        static_folder=str(static_folder),
+        template_folder=str(template_folder),
     )
 
     # Load default config first
