@@ -804,7 +804,7 @@ export const VPNDrawer = () => {
                 "svg",
                 {
                   height: "32",
-                  viewBox: "0 0 240 80",
+                  viewBox: "0 0 540 80",
                   className: "h-full w-auto",
                   fill: "none",
                   xmlns: "http://www.w3.org/2000/svg",
@@ -836,7 +836,7 @@ export const VPNDrawer = () => {
                       },
                       key: "text",
                     },
-                    "OpenVPN"
+                    `OpenVPN Client Portal (v${window.VERSION})`
                   ),
                 ]
               )
@@ -877,12 +877,7 @@ export const VPNDrawer = () => {
                   : "Not authenticated"
               ),
             ]
-          ),
-          React.createElement("div", {
-            id: "signInDiv",
-            className: "w-full scale-90",
-            key: "sign-in",
-          })
+          )
         ),
 
         // Status Card
@@ -1019,39 +1014,45 @@ export const VPNDrawer = () => {
             className: "mt-auto",
             key: "download",
           },
-          React.createElement(
-            "button",
-            {
-              className: `w-full flex items-center justify-center space-x-2 px-4 py-2 bg-orange-700 text-white rounded-lg hover:bg-orange-800 ${
-                !isAuthenticated ? "opacity-50 cursor-not-allowed" : ""
-              }`,
-              disabled: !isAuthenticated,
-              onClick: handleDownload,
-            },
-            [
-              React.createElement(
-                "svg",
+          isAuthenticated
+            ? React.createElement(
+                "button",
                 {
-                  className: "h-4 w-4",
-                  viewBox: "0 0 24 24",
-                  fill: "none",
-                  stroke: "currentColor",
-                  strokeWidth: "2",
-                  key: "download-icon",
+                  className: `w-full flex items-center justify-center space-x-2 px-4 py-2 bg-orange-700 text-white rounded-lg hover:bg-orange-800 ${
+                    !isAuthenticated ? "opacity-50 cursor-not-allowed" : ""
+                  }`,
+                  disabled: !isAuthenticated,
+                  onClick: handleDownload,
                 },
-                React.createElement("path", {
-                  d: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3",
-                })
-              ),
-              React.createElement(
-                "span",
-                {
-                  key: "download-text",
-                },
-                "Download Config"
-              ),
-            ]
-          )
+                [
+                  React.createElement(
+                    "svg",
+                    {
+                      className: "h-4 w-4",
+                      viewBox: "0 0 24 24",
+                      fill: "none",
+                      stroke: "currentColor",
+                      strokeWidth: "2",
+                      key: "download-icon",
+                    },
+                    React.createElement("path", {
+                      d: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3",
+                    })
+                  ),
+                  React.createElement(
+                    "span",
+                    {
+                      key: "download-text",
+                    },
+                    "Download Config"
+                  ),
+                ]
+              )
+            : React.createElement("div", {
+                id: "signInDiv",
+                className: "w-full scale-90",
+                key: "sign-in",
+              })
         ),
 
         // Footer
