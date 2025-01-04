@@ -25,6 +25,7 @@ def mock_openvpn_dir():
 
         # Store original directory
         original_dir = Config.OPENVPN_DIR
+
         # Set config to use temp directory
         Config.OPENVPN_DIR = temp_dir
 

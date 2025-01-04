@@ -18,6 +18,7 @@ from flask import session
 from ..main import bp
 from ..middleware import require_auth
 from ..vpn import generate_ovpn_config
+from ..config import Config
 
 
 @bp.route("/auth-status")
@@ -66,6 +67,7 @@ def index():
             "index.html",
             client_id=current_app.config["CLIENT_ID"],
             vpn_network=current_app.config.get("VPN_NETWORK", "10.8.0.0/24"),
+            app_version=get_version(),
             error=error,
         )
     )
@@ -77,9 +79,10 @@ def index():
 @require_auth
 def download_config(email):
     try:
+        # First generate the config - if this fails, we won't create any temp files
         config = generate_ovpn_config(email)
 
-        # Create a temporary file
+        # Only create temp file if config generation succeeded
         with tempfile.NamedTemporaryFile(
             mode="w", suffix=".ovpn", delete=False
         ) as temp_file:
