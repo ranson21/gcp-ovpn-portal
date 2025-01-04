@@ -25,6 +25,7 @@ def generate_client_certificates(email):
             check=True,
             capture_output=True,
             text=True,
+            input=f"{email}\n",
         )
 
         subprocess.run(
