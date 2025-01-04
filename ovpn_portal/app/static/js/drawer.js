@@ -339,7 +339,9 @@ const NetworkMetrics = ({ isConnected, clientIp }) => {
         const start = performance.now();
 
         // Try ip-api.com instead of ipapi.co (more generous rate limits)
-        const locationResponse = await fetch("http://ip-api.com/json/");
+        const locationResponse = await fetch(
+          "https://get.geojs.io/v1/ip/geo.json"
+        );
         if (!locationResponse.ok) {
           throw new Error("Location API request failed");
         }
@@ -354,7 +356,7 @@ const NetworkMetrics = ({ isConnected, clientIp }) => {
             city: locationData.city,
             region: locationData.region,
             country: locationData.country,
-            isp: locationData.isp,
+            isp: locationData.organization_name,
             loading: false,
           },
           latency: {
