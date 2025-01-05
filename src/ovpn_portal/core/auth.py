@@ -12,11 +12,11 @@ class AuthManager:
         """Verify Google OAuth token and return email if valid."""
         try:
             idinfo = id_token.verify_oauth2_token(
-                token, requests.Request(), self.config.CLIENT_ID
+                token, requests.Request(), self.config["CLIENT_ID"]
             )
 
             email = idinfo.get("email", "")
-            if not email.endswith("@" + self.config.ALLOWED_DOMAIN):
+            if not email.endswith("@" + self.config["ALLOWED_DOMAIN"]):
                 raise ValueError("Invalid email domain")
 
             return email

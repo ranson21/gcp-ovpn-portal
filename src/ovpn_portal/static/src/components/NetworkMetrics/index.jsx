@@ -1,10 +1,9 @@
 // src/ovpn_portal/static/src/components/Drawer/NetworkMetrics.jsx
 import React, { useState, useEffect } from "react";
 import { useVpnStatus } from "../../hooks/useVpnStatus";
-import { StatusIndicator } from "./StatusIndicator";
 
 export const NetworkMetrics = () => {
-  const { connected, clientIp, loading } = useVpnStatus();
+  const { connected, clientIp } = useVpnStatus();
   const [metrics, setMetrics] = useState({
     location: { city: "Loading...", country: "...", region: "" },
     latency: { value: null },

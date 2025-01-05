@@ -1,6 +1,9 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { resolve } from "path";
+import postcss from "postcss";
+import tailwindcss from "tailwindcss";
+import autoprefixer from "autoprefixer";
 import fs from "fs";
 import { build } from "vite";
 
@@ -27,46 +30,46 @@ function forceRebuild() {
   return {
     name: "force-rebuild",
     async handleHotUpdate({ file, server, modules, read }) {
-      console.log("File changed:", file);
+      console.log("File changed - forcing rebuild:", file);
 
-      if (file.includes("/hooks/")) {
-        console.log("Hook file changed - forcing rebuild");
-        try {
-          // Create a clean config for the build
-          const buildConfig = {
-            root: server.config.root,
-            base: server.config.base,
-            mode: "development",
-            build: {
-              outDir: "dist",
-              rollupOptions: {
-                input: resolve(server.config.root, "src/main.jsx"),
-              },
+      try {
+        // Create a clean config for the build
+        const buildConfig = {
+          root: server.config.root,
+          base: server.config.base,
+          mode: "development",
+          build: {
+            outDir: "dist",
+            rollupOptions: {
+              input: resolve(server.config.root, "src/main.jsx"),
             },
-            // Only include necessary plugins
-            plugins: [
-              server.config.plugins.find(
-                (p) => p.name === "@vitejs/plugin-react"
-              ),
-            ],
-          };
+          },
+          // Only include necessary plugins
+          plugins: [
+            server.config.plugins.find(
+              (p) => p.name === "@vitejs/plugin-react"
+            ),
+          ],
+        };
 
-          await build(buildConfig);
-          server.ws.send({ type: "full-reload" });
-        } catch (error) {
-          console.error("Build failed:", error);
-        }
-        return [];
+        await build(buildConfig);
+        server.ws.send({ type: "full-reload" });
+      } catch (error) {
+        console.error("Build failed:", error);
       }
-
-      return modules;
+      return [];
     },
   };
 }
 
 export default defineConfig({
   root: __dirname, // Explicitly set the root
-  plugins: [react(), copyIndexHtml(), forceRebuild()],
+  plugins: [react(), copyIndexHtml(), forceRebuild(), postcss()],
+  css: {
+    postcss: {
+      plugins: [tailwindcss(), autoprefixer()],
+    },
+  },
   build: {
     outDir: "dist",
     rollupOptions: {

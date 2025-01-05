@@ -10,12 +10,12 @@ class VPNManager:
 
     def __init__(self, config):
         self.config = config
-        self.easy_rsa_dir = Path(config.OPENVPN_DIR) / "easy-rsa"
+        self.easy_rsa_dir = Path(config["OPENVPN_DIR"]) / "easy-rsa"
 
     def ensure_client_certificates(self, email: str) -> None:
         """Ensure client certificates exist, generate if needed."""
-        cert_path = Path(self.config.OPENVPN_DIR) / f"{email}.crt"
-        key_path = Path(self.config.OPENVPN_DIR) / f"{email}.key"
+        cert_path = Path(self.config["OPENVPN_DIR"]) / f"{email}.crt"
+        key_path = Path(self.config["OPENVPN_DIR"]) / f"{email}.key"
 
         if cert_path.exists() and key_path.exists():
             return
@@ -52,7 +52,7 @@ class VPNManager:
                     self.easy_rsa_dir
                     / f"pki/{'issued' if ext == '.crt' else 'private'}/{email}{ext}"
                 )
-                dst = Path(self.config.OPENVPN_DIR) / f"{email}{ext}"
+                dst = Path(self.config["OPENVPN_DIR"]) / f"{email}{ext}"
                 dst.write_bytes(src.read_bytes())
 
         except subprocess.CalledProcessError as e:
@@ -67,15 +67,15 @@ class VPNManager:
 
         # Replace placeholders
         replacements = {
-            "{{EXTERNAL_IP}}": self.config.EXTERNAL_IP,
-            "{{CA_CERT}}": (Path(self.config.OPENVPN_DIR) / "ca.crt").read_text(),
+            "{{EXTERNAL_IP}}": self.config["EXTERNAL_IP"],
+            "{{CA_CERT}}": (Path(self.config["OPENVPN_DIR"]) / "ca.crt").read_text(),
             "{{CLIENT_CERT}}": (
-                Path(self.config.OPENVPN_DIR) / f"{email}.crt"
+                Path(self.config["OPENVPN_DIR"]) / f"{email}.crt"
             ).read_text(),
             "{{CLIENT_KEY}}": (
-                Path(self.config.OPENVPN_DIR) / f"{email}.key"
+                Path(self.config["OPENVPN_DIR"]) / f"{email}.key"
             ).read_text(),
-            "{{TLS_AUTH}}": (Path(self.config.OPENVPN_DIR) / "ta.key").read_text(),
+            "{{TLS_AUTH}}": (Path(self.config["OPENVPN_DIR"]) / "ta.key").read_text(),
         }
 
         for key, value in replacements.items():

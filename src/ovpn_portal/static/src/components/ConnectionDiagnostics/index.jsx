@@ -1,6 +1,6 @@
 // src/ovpn_portal/static/src/components/Drawer/ConnectionDiagnostics.jsx
 import React, { useState, useEffect } from "react";
-import { StatusIndicator } from "./StatusIndicator";
+import { StatusIndicator } from "../StatusIndicator";
 
 export const ConnectionDiagnostics = ({ isConnected }) => {
   const [diagnostics, setDiagnostics] = useState({

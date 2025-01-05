@@ -7,6 +7,10 @@
       type="image/x-icon"
       href="{{ url_for('static', filename='favicon.ico') }}"
     />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='assets/main.css') }}"
+    />
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
@@ -14,7 +18,6 @@
     <!-- Add React -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
 
     <!-- Inject Flask variables -->
     <script>

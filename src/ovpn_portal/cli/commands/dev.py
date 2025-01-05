@@ -22,7 +22,7 @@ def run_dev():
     # Add Flask development server
     os.environ["FLASK_APP"] = "ovpn_portal.web.app:create_app()"
     os.environ["FLASK_ENV"] = "development"
-    manager.add_process("flask", "flask run --port 8081 --debug")
+    manager.add_process("flask", "flask run --port 8000 --debug")
 
     # Add Vite development server
     manager.add_process(
