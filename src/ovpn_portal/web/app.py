@@ -1,0 +1,30 @@
+from flask import Flask
+from flask_cors import CORS
+from ..core.config import Config
+
+from .routes.ui import ui_bp
+from .routes.health import health_bp
+from .routes.vpn import vpn_bp
+from .routes.auth import auth_bp
+
+
+def create_app(config_object=None):
+    app = Flask(
+        __name__, static_folder="../static/dist", template_folder="../static/dist"
+    )
+
+    if config_object is None:
+        config_object = Config()
+
+    app.config.from_object(config_object)
+
+    # Initialize CORS
+    CORS(app)
+
+    # Register blueprints
+    app.register_blueprint(ui_bp)  # UI routes first (catch-all should be last)
+    app.register_blueprint(auth_bp, url_prefix="/auth")
+    app.register_blueprint(vpn_bp, url_prefix="/vpn")
+    app.register_blueprint(health_bp)
+
+    return app

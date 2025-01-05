@@ -46,3 +46,7 @@ poetry.lock
 
 # Misc
 .DS_Store
+
+# .gitignore
+src/ovpn_portal/static/node_modules/
+src/ovpn_portal/static/dist/

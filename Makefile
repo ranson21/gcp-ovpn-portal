@@ -7,9 +7,13 @@ POETRY = poetry
 install:
 	$(POETRY) install
 
-# Run development server
+# Run local version
 run:
 	$(POETRY) run ovpn-portal
+
+# Run development server
+dev:
+	$(POETRY) run dev
 
 # Run tests
 test:
