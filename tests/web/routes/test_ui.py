@@ -1,6 +1,7 @@
 import pytest
 from unittest.mock import patch
 from google.oauth2 import id_token
+from werkzeug.exceptions import NotFound
 
 
 def test_index_get(client):
@@ -175,3 +176,28 @@ def test_index_post_valid_email_session(monkeypatch, client, config):
         with client.session_transaction() as sess:
             assert sess["email"] == valid_email
             assert sess["token"] == test_token
+
+
+def test_static_files_file_not_found(client, monkeypatch):
+    """Test static file serving when file is not found."""
+    from werkzeug.utils import send_from_directory as werkzeug_send
+
+    def mock_send(*args, **kwargs):
+        raise FileNotFoundError()
+
+    monkeypatch.setattr("werkzeug.utils.send_from_directory", mock_send)
+
+    response = client.get("/static/nonexistent.txt")
+    assert response.status_code == 404
+
+
+def test_static_files_with_empty_static_dir(client, monkeypatch):
+    """Test static file serving with empty static directory."""
+    from pathlib import Path
+    from ovpn_portal.core.config import Config
+
+    # Set an empty temp directory as static dir
+    monkeypatch.setattr(Config, "FRONTEND_DIR", str(Path("/nonexistent/path")))
+
+    response = client.get("/static/test.txt")
+    assert response.status_code == 404

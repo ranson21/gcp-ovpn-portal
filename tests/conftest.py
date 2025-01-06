@@ -4,6 +4,13 @@ import os
 from pathlib import Path
 from ovpn_portal.core.config import Config
 from ovpn_portal.web.app import create_app
+import warnings
+
+
+def pytest_configure(config):
+    warnings.filterwarnings(
+        "ignore", category=DeprecationWarning, module="gunicorn.util"
+    )
 
 
 @pytest.fixture
@@ -16,6 +23,7 @@ def mock_env(monkeypatch):
         "OPENVPN_DIR": "/tmp/openvpn",
         "SECRET_KEY": "test-key",
         "FLASK_ENV": "development",
+        "LOG_DIR": "/tmp/ovpn-portal/logs",  # Add this line
     }
 
     for key, value in env_vars.items():

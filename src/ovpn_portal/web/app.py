@@ -6,6 +6,7 @@ from .routes.ui import ui_bp
 from .routes.health import health_bp
 from .routes.vpn import vpn_bp
 from .routes.auth import auth_bp
+from ..core.logging import setup_logging
 
 
 def create_app(config_object=None):
@@ -20,6 +21,9 @@ def create_app(config_object=None):
 
     # Initialize CORS
     CORS(app)
+
+    # Set up logging
+    setup_logging(app)  # Add this line
 
     # Register blueprints
     app.register_blueprint(ui_bp)  # UI routes first (catch-all should be last)

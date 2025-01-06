@@ -2,6 +2,7 @@ import click
 from ...web.app import create_app
 from ...core.config import Config
 from ...core.cli import print_openvpn_logo
+from ...core.logging import get_gunicorn_options
 
 
 @click.command()
@@ -40,11 +41,9 @@ def serve(ctx, host, port, workers):
             def load(self):
                 return self.application
 
-        options = {
-            "bind": f"{host}:{port}",
-            "workers": workers,
-            "worker_class": "sync",
-            "timeout": 30,
-        }
+        options = get_gunicorn_options()
+        if workers:
+            options["workers"] = workers
+        options["bind"] = f"{host}:{port}"
 
         GunicornApp(app, options).run()

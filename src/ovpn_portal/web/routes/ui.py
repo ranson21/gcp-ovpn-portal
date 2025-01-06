@@ -1,13 +1,13 @@
 from flask import (
     Blueprint,
     render_template,
-    current_app,
     send_from_directory,
     request,
     redirect,
     url_for,
     make_response,
     session,
+    abort,
 )
 import os
 import os
@@ -68,4 +68,7 @@ def static_files(path):
     static_dir = Config.FRONTEND_DIR
     if not static_dir:
         static_dir = os.path.join(os.path.dirname(__file__), "..", "static", "dist")
-    return send_from_directory(static_dir, path)
+    try:
+        return send_from_directory(static_dir, path)
+    except FileNotFoundError:
+        abort(404)  # Return 404 instead of letting it raise an unhandled exception

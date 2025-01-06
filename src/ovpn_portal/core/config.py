@@ -13,6 +13,7 @@ class Config:
     EXTERNAL_IP = os.environ.get("EXTERNAL_IP")
     OPENVPN_DIR = os.environ.get("OPENVPN_DIR", "/etc/openvpn")
     VPN_NETWORK = os.environ.get("VPN_NETWORK", "10.8.0.0/24")
+    LOG_DIR = os.environ.get("LOG_DIR", "/var/log/ovpn-portal")  # Add this line
 
     # Frontend build directory
     FRONTEND_DIR = os.path.join(Path(__file__).parent.parent, "static", "dist")

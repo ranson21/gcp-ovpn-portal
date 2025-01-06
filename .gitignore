@@ -50,3 +50,4 @@ poetry.lock
 # .gitignore
 src/ovpn_portal/static/node_modules/
 src/ovpn_portal/static/dist/
+tmp
