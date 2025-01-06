@@ -1,8 +1,10 @@
-import pytest
 from unittest.mock import patch
-from ovpn_portal.core.auth import AuthManager
-from google.oauth2 import id_token
+
+import pytest
 from google.auth.transport import requests
+from google.oauth2 import id_token
+
+from ovpn_portal.core.auth import AuthManager
 
 
 def test_auth_manager_init(config):

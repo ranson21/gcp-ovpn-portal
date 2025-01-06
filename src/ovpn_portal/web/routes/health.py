@@ -1,4 +1,5 @@
 from flask import Blueprint, jsonify
+
 from ...core.version import get_version
 
 health_bp = Blueprint("health", __name__)

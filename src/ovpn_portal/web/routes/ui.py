@@ -1,19 +1,9 @@
-from flask import (
-    Blueprint,
-    render_template,
-    send_from_directory,
-    request,
-    redirect,
-    url_for,
-    make_response,
-    session,
-    abort,
-)
 import os
-import os
-from google.oauth2 import id_token
-from google.auth.transport import requests
 
+from flask import (Blueprint, abort, make_response, redirect, render_template,
+                   request, send_from_directory, session, url_for)
+from google.auth.transport import requests
+from google.oauth2 import id_token
 
 from ...core.config import Config
 from ...core.version import get_version

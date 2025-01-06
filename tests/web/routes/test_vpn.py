@@ -1,7 +1,8 @@
-import pytest
-from unittest.mock import patch
-import tempfile
 import os
+import tempfile
+from unittest.mock import patch
+
+import pytest
 
 
 def test_download_config_success(client, auth_headers):
@@ -67,8 +68,9 @@ def test_vpn_status_invalid_ip(client):
 
 def test_download_config_cleanup(client, auth_headers):
     """Test that temporary files are cleaned up after config download."""
-    import os
     import io
+    import os
+
     from flask import send_file
 
     with patch("ovpn_portal.core.auth.AuthManager.verify_token") as mock_auth, patch(
@@ -118,7 +120,8 @@ def test_download_config_cleanup(client, auth_headers):
 def test_download_config_cleanup(app, auth_client, mock_openvpn_dir):
     """Test download config cleanup functionality."""
     import tempfile
-    from unittest.mock import patch, MagicMock
+    from unittest.mock import MagicMock, patch
+
     from flask import send_file
 
     app.config["ALLOWED_DOMAIN"] = "test.com"
@@ -173,7 +176,8 @@ def test_download_config_cleanup(app, auth_client, mock_openvpn_dir):
 def test_download_config_cleanup_scenarios(app, auth_client, mock_openvpn_dir):
     """Test both successful and failed cleanup scenarios."""
     import tempfile
-    from unittest.mock import patch, MagicMock
+    from unittest.mock import MagicMock, patch
+
     from flask import send_file
 
     app.config["ALLOWED_DOMAIN"] = "test.com"

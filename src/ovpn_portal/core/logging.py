@@ -1,13 +1,15 @@
 # src/ovpn_portal/core/logging.py
-from gunicorn.glogging import Logger
-import multiprocessing
-from .config import Config
 import logging
+import multiprocessing
 import sys
+import time
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
-from flask import request, has_request_context
-import time
+
+from flask import has_request_context, request
+from gunicorn.glogging import Logger
+
+from .config import Config
 
 
 class GunicornLogger(Logger):
@@ -146,7 +148,7 @@ def setup_logging(app):
     # Error logging
     @app.errorhandler(Exception)
     def handle_exception(e):
-        from werkzeug.exceptions import NotFound, HTTPException
+        from werkzeug.exceptions import HTTPException, NotFound
 
         # Handle 404 errors properly
         if isinstance(e, NotFound):

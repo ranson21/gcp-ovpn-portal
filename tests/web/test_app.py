@@ -1,8 +1,10 @@
 def test_app_debug_mode(monkeypatch):
     """Test serve command in debug mode."""
-    from ovpn_portal.web.app import create_app
-    from flask import Flask
     from unittest.mock import patch
+
+    from flask import Flask
+
+    from ovpn_portal.web.app import create_app
 
     app = create_app()
     app.debug = True

@@ -1,9 +1,10 @@
 import click
+
 from ..core.config import Config
+from .commands.dev import run_dev
 from .commands.serve import serve
 from .commands.setup import setup
 from .commands.version import version
-from .commands.dev import run_dev
 
 
 @click.group()

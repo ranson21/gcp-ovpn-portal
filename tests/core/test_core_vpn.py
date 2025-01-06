@@ -1,7 +1,9 @@
-import pytest
-from unittest.mock import patch, mock_open
-from pathlib import Path
 import subprocess
+from pathlib import Path
+from unittest.mock import mock_open, patch
+
+import pytest
+
 from ovpn_portal.core.vpn import VPNManager
 
 
@@ -83,8 +85,9 @@ def test_generate_config(config, mock_openvpn_dir, mock_template):
 
 def test_vpn_manager_ensure_client_certificates_not_exists(config, mock_openvpn_dir):
     """Test ensure_client_certificates when certificates don't exist."""
-    from ovpn_portal.core.vpn import VPNManager
     from unittest.mock import patch
+
+    from ovpn_portal.core.vpn import VPNManager
 
     config.OPENVPN_DIR = mock_openvpn_dir
     vpn = VPNManager(config)
@@ -97,9 +100,11 @@ def test_vpn_manager_ensure_client_certificates_not_exists(config, mock_openvpn_
 
 def test_vpn_manager_generate_client_certificates_no_easyrsa(config, mock_openvpn_dir):
     """Test certificate generation when easy-rsa directory doesn't exist."""
-    from ovpn_portal.core.vpn import VPNManager
     import shutil
+
     import pytest
+
+    from ovpn_portal.core.vpn import VPNManager
 
     config.OPENVPN_DIR = mock_openvpn_dir
     vpn = VPNManager(config)

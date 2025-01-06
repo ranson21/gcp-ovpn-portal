@@ -1,5 +1,6 @@
-import pytest
 from unittest.mock import patch
+
+import pytest
 from google.oauth2 import id_token
 from werkzeug.exceptions import NotFound
 
@@ -70,8 +71,9 @@ def test_index_post_no_credential(client):
 
 def test_static_files_no_frontend_dir(client, monkeypatch):
     """Test static file serving with no frontend directory."""
-    from ovpn_portal.core.config import Config
     import os
+
+    from ovpn_portal.core.config import Config
 
     # Clear FRONTEND_DIR
     monkeypatch.setattr(Config, "FRONTEND_DIR", None)
@@ -105,7 +107,7 @@ def test_index_post_google_verification_error(client):
 
 def test_index_post_verification_exception(client, config):
     """Test login POST request with verification exception."""
-    from urllib.parse import urlparse, parse_qs
+    from urllib.parse import parse_qs, urlparse
 
     with patch("google.oauth2.id_token.verify_oauth2_token") as mock_verify:
         mock_verify.side_effect = Exception("External service error")
@@ -194,6 +196,7 @@ def test_static_files_file_not_found(client, monkeypatch):
 def test_static_files_with_empty_static_dir(client, monkeypatch):
     """Test static file serving with empty static directory."""
     from pathlib import Path
+
     from ovpn_portal.core.config import Config
 
     # Set an empty temp directory as static dir

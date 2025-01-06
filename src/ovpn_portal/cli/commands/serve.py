@@ -1,8 +1,9 @@
 import click
-from ...web.app import create_app
-from ...core.config import Config
+
 from ...core.cli import print_openvpn_logo
+from ...core.config import Config
 from ...core.logging import get_gunicorn_options
+from ...web.app import create_app
 
 
 @click.command()

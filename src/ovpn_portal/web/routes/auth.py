@@ -1,4 +1,5 @@
-from flask import Blueprint, jsonify, request, session, current_app
+from flask import Blueprint, current_app, jsonify, request, session
+
 from ...core.auth import AuthManager
 from ...core.config import Config
 

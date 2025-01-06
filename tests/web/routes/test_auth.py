@@ -3,7 +3,7 @@ from flask import session
 
 
 def test_auth_status_authenticated(client):
-    from unittest.mock import patch, MagicMock
+    from unittest.mock import MagicMock, patch
 
     """Test auth status when authenticated."""
     with client.session_transaction() as sess:
@@ -44,7 +44,7 @@ def test_auth_status_unauthenticated(client):
 
 
 def test_auth_status_invalid_token(client):
-    from unittest.mock import patch, MagicMock
+    from unittest.mock import MagicMock, patch
 
     """Test auth status with invalid token."""
     with client.session_transaction() as sess:

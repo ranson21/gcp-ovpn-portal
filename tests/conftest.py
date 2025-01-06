@@ -1,10 +1,12 @@
-import pytest
-import tempfile
 import os
+import tempfile
+import warnings
 from pathlib import Path
+
+import pytest
+
 from ovpn_portal.core.config import Config
 from ovpn_portal.web.app import create_app
-import warnings
 
 
 def pytest_configure(config):

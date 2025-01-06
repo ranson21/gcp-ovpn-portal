@@ -1,5 +1,6 @@
 from functools import wraps
-from flask import jsonify, request, current_app
+
+from flask import current_app, jsonify, request
 
 from ..core.auth import AuthManager
 from ..core.config import Config

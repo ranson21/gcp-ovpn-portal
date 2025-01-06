@@ -1,7 +1,7 @@
-import click
 import os
 import subprocess
-from ...core.config import Config
+
+import click
 
 
 @click.command()

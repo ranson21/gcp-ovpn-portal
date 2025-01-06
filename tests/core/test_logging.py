@@ -1,9 +1,10 @@
-import pytest
+import logging
 import multiprocessing
 from pathlib import Path
-import logging
-from werkzeug.exceptions import NotFound, HTTPException
+
+import pytest
 from flask import request
+from werkzeug.exceptions import HTTPException, NotFound
 
 from ovpn_portal.core.logging import GunicornLogger
 
