@@ -33,7 +33,9 @@ def setup(ctx, force):
         if not os.path.exists(os.path.join(config.OPENVPN_DIR, "server.crt")) or force:
             click.echo("Generating server certificates...")
             subprocess.run(
-                ["easyrsa", "build-server-full", "server"], cwd=easy_rsa_dir, check=True
+                ["easyrsa", "build-server-full", "server"],
+                cwd=easy_rsa_dir,
+                check=True,
             )
 
         # Generate ta.key if it doesn't exist

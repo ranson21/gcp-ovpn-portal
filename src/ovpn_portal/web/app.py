@@ -1,7 +1,6 @@
 from flask import Flask
 from flask_cors import CORS
 
-from ..core.config import Config
 from ..core.logging import setup_logging
 from .routes.auth import auth_bp
 from .routes.health import health_bp
@@ -11,7 +10,9 @@ from .routes.vpn import vpn_bp
 
 def create_app(config_object=None):
     app = Flask(
-        __name__, static_folder="../static/dist", template_folder="../static/dist"
+        __name__,
+        static_folder="../static/dist",
+        template_folder="../static/dist",
     )
 
     if config_object is None:

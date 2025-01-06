@@ -1,10 +1,6 @@
 # src/ovpn_portal/core/vpn.py
-import os
 import subprocess
 from pathlib import Path
-from typing import Optional
-
-from .config import Config
 
 
 class VPNManager:
@@ -50,10 +46,7 @@ class VPNManager:
 
             # Copy files to OpenVPN directory
             for ext in [".crt", ".key"]:
-                src = (
-                    self.easy_rsa_dir
-                    / f"pki/{'issued' if ext == '.crt' else 'private'}/{email}{ext}"
-                )
+                src = self.easy_rsa_dir / f"pki/{'issued' if ext == '.crt' else 'private'}/{email}{ext}"
                 dst = Path(self.config.OPENVPN_DIR) / f"{email}{ext}"
                 dst.write_bytes(src.read_bytes())
 
@@ -74,12 +67,8 @@ class VPNManager:
         replacements = {
             "{{EXTERNAL_IP}}": self.config.EXTERNAL_IP,
             "{{CA_CERT}}": (Path(self.config.OPENVPN_DIR) / "ca.crt").read_text(),
-            "{{CLIENT_CERT}}": (
-                Path(self.config.OPENVPN_DIR) / f"{email}.crt"
-            ).read_text(),
-            "{{CLIENT_KEY}}": (
-                Path(self.config.OPENVPN_DIR) / f"{email}.key"
-            ).read_text(),
+            "{{CLIENT_CERT}}": (Path(self.config.OPENVPN_DIR) / f"{email}.crt").read_text(),
+            "{{CLIENT_KEY}}": (Path(self.config.OPENVPN_DIR) / f"{email}.key").read_text(),
             "{{TLS_AUTH}}": (Path(self.config.OPENVPN_DIR) / "ta.key").read_text(),
         }
 

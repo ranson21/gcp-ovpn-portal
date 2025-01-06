@@ -1,7 +1,5 @@
 from unittest.mock import patch
 
-import pytest
-
 from ovpn_portal.core.cli import print_openvpn_logo
 
 

@@ -1,8 +1,4 @@
-import os
-import tempfile
 from unittest.mock import patch
-
-import pytest
 
 
 def test_download_config_success(client, auth_headers):
@@ -66,60 +62,8 @@ def test_vpn_status_invalid_ip(client):
     assert data["client_ip"] == "invalid-ip"
 
 
-def test_download_config_cleanup(client, auth_headers):
-    """Test that temporary files are cleaned up after config download."""
-    import io
-    import os
-
-    from flask import send_file
-
-    with patch("ovpn_portal.core.auth.AuthManager.verify_token") as mock_auth, patch(
-        "ovpn_portal.core.vpn.VPNManager.generate_config"
-    ) as mock_vpn:
-
-        mock_auth.return_value = "test@example.com"
-        mock_vpn.return_value = "test config"
-
-        test_file = None
-
-        def mock_send_file(*args, **kwargs):
-            nonlocal test_file
-            # Create a temporary file
-            temp = tempfile.NamedTemporaryFile(delete=False)
-            temp.write(b"test config")
-            temp.close()
-            test_file = temp.name
-
-            # Return a response with cleanup
-            response = send_file(
-                test_file, as_attachment=True, mimetype="application/x-openvpn-profile"
-            )
-
-            @response.call_on_close
-            def cleanup():
-                try:
-                    os.remove(test_file)
-                except:
-                    pass
-
-            return response
-
-        with patch("flask.send_file", mock_send_file):
-            response = client.get("/vpn/download-config", headers=auth_headers)
-            assert response.status_code == 200
-
-            # Get and run all cleanup callbacks
-            if hasattr(response, "call_on_close"):
-                response.close()
-
-            # Verify cleanup happened
-            if test_file:
-                assert not os.path.exists(test_file)
-
-
 def test_download_config_cleanup(app, auth_client, mock_openvpn_dir):
     """Test download config cleanup functionality."""
-    import tempfile
     from unittest.mock import MagicMock, patch
 
     from flask import send_file
@@ -158,7 +102,8 @@ def test_download_config_cleanup(app, auth_client, mock_openvpn_dir):
 
             # Make request
             response = auth_client.get(
-                "/vpn/download-config", headers={"Authorization": "Bearer valid-token"}
+                "/vpn/download-config",
+                headers={"Authorization": "Bearer valid-token"},
             )
 
             assert response.status_code == 200
@@ -175,8 +120,7 @@ def test_download_config_cleanup(app, auth_client, mock_openvpn_dir):
 
 def test_download_config_cleanup_scenarios(app, auth_client, mock_openvpn_dir):
     """Test both successful and failed cleanup scenarios."""
-    import tempfile
-    from unittest.mock import MagicMock, patch
+    from unittest.mock import patch
 
     from flask import send_file
 
@@ -212,7 +156,8 @@ def test_download_config_cleanup_scenarios(app, auth_client, mock_openvpn_dir):
         mock_generate.return_value = "test config"
 
         response = auth_client.get(
-            "/vpn/download-config", headers={"Authorization": "Bearer valid-token"}
+            "/vpn/download-config",
+            headers={"Authorization": "Bearer valid-token"},
         )
 
         assert response.status_code == 200
@@ -238,7 +183,8 @@ def test_download_config_cleanup_scenarios(app, auth_client, mock_openvpn_dir):
         mock_unlink.side_effect = FileNotFoundError()  # Simulate file already gone
 
         response = auth_client.get(
-            "/vpn/download-config", headers={"Authorization": "Bearer valid-token"}
+            "/vpn/download-config",
+            headers={"Authorization": "Bearer valid-token"},
         )
 
         assert response.status_code == 200

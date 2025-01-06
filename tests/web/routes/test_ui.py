@@ -1,9 +1,5 @@
 from unittest.mock import patch
 
-import pytest
-from google.oauth2 import id_token
-from werkzeug.exceptions import NotFound
-
 
 def test_index_get(client):
     """Test index page GET request."""
@@ -182,7 +178,6 @@ def test_index_post_valid_email_session(monkeypatch, client, config):
 
 def test_static_files_file_not_found(client, monkeypatch):
     """Test static file serving when file is not found."""
-    from werkzeug.utils import send_from_directory as werkzeug_send
 
     def mock_send(*args, **kwargs):
         raise FileNotFoundError()

@@ -1,7 +1,6 @@
 import click
 
 from ...core.cli import print_openvpn_logo
-from ...core.config import Config
 from ...core.logging import get_gunicorn_options
 from ...web.app import create_app
 
@@ -16,9 +15,7 @@ def serve(ctx, host, port, workers):
     config = ctx.obj["config"]
 
     if not all([config.CLIENT_ID, config.ALLOWED_DOMAIN, config.EXTERNAL_IP]):
-        raise click.ClickException(
-            "Missing required configuration. Please check your environment variables."
-        )
+        raise click.ClickException("Missing required configuration. Please check your environment variables.")
 
     click.echo(print_openvpn_logo())
 

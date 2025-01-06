@@ -27,14 +27,15 @@ coverage:
 
 # Run linting
 lint:
-	$(POETRY) run flake8 src/ovpn_portal/ tests/
-	$(POETRY) run black --check src/ovpn_portal/ tests/
 	$(POETRY) run isort --check-only src/ovpn_portal/ tests/
+	$(POETRY) run black --check src/ovpn_portal/ tests/
+	$(POETRY) run flake8 src/ovpn_portal/ tests/
 
 # Format code
 format:
-	$(POETRY) run black src/ovpn_portal/ tests/
+	$(POETRY) run autoflake --in-place --remove-all-unused-imports --recursive .
 	$(POETRY) run isort src/ovpn_portal/ tests/
+	$(POETRY) run black src/ovpn_portal/ tests/
 
 # Clean up temporary files and builds
 clean:

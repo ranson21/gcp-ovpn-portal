@@ -1,4 +1,4 @@
-from flask import Blueprint, current_app, jsonify, request, session
+from flask import Blueprint, jsonify, session
 
 from ...core.auth import AuthManager
 from ...core.config import Config
@@ -11,11 +11,11 @@ def auth_status():
     auth_manager = AuthManager(Config)
     authenticated = False
 
-    if session.get("token") != None:
+    if session.get("token") is not None:
         try:
             auth_manager.verify_token(session.get("token"))
             authenticated = True
-        except:
+        except Exception:
             authenticated = False
 
     return jsonify(

@@ -1,4 +1,3 @@
-import os
 import tempfile
 import warnings
 from pathlib import Path
@@ -10,9 +9,7 @@ from ovpn_portal.web.app import create_app
 
 
 def pytest_configure(config):
-    warnings.filterwarnings(
-        "ignore", category=DeprecationWarning, module="gunicorn.util"
-    )
+    warnings.filterwarnings("ignore", category=DeprecationWarning, module="gunicorn.util")
 
 
 @pytest.fixture
@@ -171,12 +168,8 @@ verb 3"""
         replacements = {
             "{{EXTERNAL_IP}}": self.config.EXTERNAL_IP,
             "{{CA_CERT}}": (Path(self.config.OPENVPN_DIR) / "ca.crt").read_text(),
-            "{{CLIENT_CERT}}": (
-                Path(self.config.OPENVPN_DIR) / f"{email}.crt"
-            ).read_text(),
-            "{{CLIENT_KEY}}": (
-                Path(self.config.OPENVPN_DIR) / f"{email}.key"
-            ).read_text(),
+            "{{CLIENT_CERT}}": (Path(self.config.OPENVPN_DIR) / f"{email}.crt").read_text(),
+            "{{CLIENT_KEY}}": (Path(self.config.OPENVPN_DIR) / f"{email}.key").read_text(),
             "{{TLS_AUTH}}": (Path(self.config.OPENVPN_DIR) / "ta.key").read_text(),
         }
 
@@ -185,9 +178,7 @@ verb 3"""
 
         return config
 
-    monkeypatch.setattr(
-        "ovpn_portal.core.vpn.VPNManager.generate_config", mock_generate_config
-    )
+    monkeypatch.setattr("ovpn_portal.core.vpn.VPNManager.generate_config", mock_generate_config)
 
     return template_file
 

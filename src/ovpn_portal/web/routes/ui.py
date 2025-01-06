@@ -1,7 +1,16 @@
 import os
 
-from flask import (Blueprint, abort, make_response, redirect, render_template,
-                   request, send_from_directory, session, url_for)
+from flask import (
+    Blueprint,
+    abort,
+    make_response,
+    redirect,
+    render_template,
+    request,
+    send_from_directory,
+    session,
+    url_for,
+)
 from google.auth.transport import requests
 from google.oauth2 import id_token
 
@@ -19,9 +28,7 @@ def index():
             if not credential:
                 return redirect(url_for("ui.index", error="No credential provided"))
 
-            idinfo = id_token.verify_oauth2_token(
-                credential, requests.Request(), Config.CLIENT_ID
-            )
+            idinfo = id_token.verify_oauth2_token(credential, requests.Request(), Config.CLIENT_ID)
             email = idinfo.get("email", "")
 
             if not email.endswith("@" + Config.ALLOWED_DOMAIN):

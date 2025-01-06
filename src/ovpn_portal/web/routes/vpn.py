@@ -18,9 +18,7 @@ def download_config(email):
         config = vpn_manager.generate_config(email)
 
         # Create temporary file
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".ovpn", delete=False
-        ) as temp_file:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".ovpn", delete=False) as temp_file:
             temp_file.write(config)
             temp_path = temp_file.name
 
@@ -36,7 +34,7 @@ def download_config(email):
         def cleanup():
             try:
                 os.unlink(temp_path)
-            except:
+            except Exception:
                 pass
 
         return return_value

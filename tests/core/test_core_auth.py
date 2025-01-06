@@ -1,8 +1,6 @@
 from unittest.mock import patch
 
 import pytest
-from google.auth.transport import requests
-from google.oauth2 import id_token
 
 from ovpn_portal.core.auth import AuthManager
 

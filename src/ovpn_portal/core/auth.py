@@ -1,8 +1,6 @@
 from google.auth.transport import requests
 from google.oauth2 import id_token
 
-from .config import Config
-
 
 class AuthManager:
     """Manages authentication operations."""
@@ -13,9 +11,7 @@ class AuthManager:
     def verify_token(self, token: str) -> str:
         """Verify Google OAuth token and return email if valid."""
         try:
-            idinfo = id_token.verify_oauth2_token(
-                token, requests.Request(), self.config.CLIENT_ID
-            )
+            idinfo = id_token.verify_oauth2_token(token, requests.Request(), self.config.CLIENT_ID)
 
             email = idinfo.get("email", "")
             if not email.endswith("@" + self.config.ALLOWED_DOMAIN):

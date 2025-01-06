@@ -76,12 +76,10 @@ def setup_logging(app):
 
     # Create formatters
     console_formatter = RequestFormatter(
-        "[%(asctime)s] %(remote_addr)s - %(method)s %(url)s\n"
-        "%(levelname)s in %(module)s: %(message)s"
+        "[%(asctime)s] %(remote_addr)s - %(method)s %(url)s\n" "%(levelname)s in %(module)s: %(message)s"
     )
     file_formatter = RequestFormatter(
-        "%(asctime)s - %(remote_addr)s - %(method)s - %(url)s - "
-        "%(levelname)s - %(module)s - %(message)s"
+        "%(asctime)s - %(remote_addr)s - %(method)s - %(url)s - " "%(levelname)s - %(module)s - %(message)s"
     )
 
     # Console handler
@@ -90,15 +88,15 @@ def setup_logging(app):
     console_handler.setLevel(logging.INFO)
 
     # File handlers
-    file_handler = RotatingFileHandler(
-        log_dir / "ovpn-portal.log", maxBytes=10485760, backupCount=10  # 10MB
-    )
+    file_handler = RotatingFileHandler(log_dir / "ovpn-portal.log", maxBytes=10485760, backupCount=10)  # 10MB
     file_handler.setFormatter(file_formatter)
     file_handler.setLevel(logging.INFO)
 
     # Error file handler
     error_file_handler = RotatingFileHandler(
-        log_dir / "ovpn-portal.error.log", maxBytes=10485760, backupCount=10  # 10MB
+        log_dir / "ovpn-portal.error.log",
+        maxBytes=10485760,
+        backupCount=10,  # 10MB
     )
     error_file_handler.setFormatter(file_formatter)
     error_file_handler.setLevel(logging.ERROR)
@@ -138,8 +136,7 @@ def setup_logging(app):
         }
 
         app.logger.info(
-            f"{log_data['method']} {log_data['path']} "
-            f"{log_data['status']} {log_data['duration']}s {log_data['ip']}"
+            f"{log_data['method']} {log_data['path']} " f"{log_data['status']} {log_data['duration']}s {log_data['ip']}"
         )
 
         return response
