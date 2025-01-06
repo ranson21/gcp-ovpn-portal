@@ -5,6 +5,7 @@ POETRY = poetry
 
 # Install dependencies
 install:
+	@mkdir -p tmp/logs
 	$(POETRY) install
 
 # Run local version
