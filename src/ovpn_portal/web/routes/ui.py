@@ -15,6 +15,7 @@ from google.oauth2 import id_token
 from google.auth.transport import requests
 
 
+from ...core.config import Config
 from ...core.version import get_version
 
 ui_bp = Blueprint("ui", __name__)
@@ -29,11 +30,11 @@ def index():
                 return redirect(url_for("ui.index", error="No credential provided"))
 
             idinfo = id_token.verify_oauth2_token(
-                credential, requests.Request(), current_app.config["CLIENT_ID"]
+                credential, requests.Request(), Config.CLIENT_ID
             )
             email = idinfo.get("email", "")
 
-            if not email.endswith("@" + current_app.config["ALLOWED_DOMAIN"]):
+            if not email.endswith("@" + Config.ALLOWED_DOMAIN):
                 return redirect(url_for("ui.index", error="Invalid domain"))
 
             # Store in session
@@ -51,8 +52,8 @@ def index():
     response = make_response(
         render_template(
             "index.html",
-            client_id=current_app.config["CLIENT_ID"],
-            vpn_network=current_app.config.get("VPN_NETWORK", "10.8.0.0/24"),
+            client_id=Config.CLIENT_ID,
+            vpn_network=Config.VPN_NETWORK,
             app_version=get_version(),
             error=error,
         )
@@ -64,7 +65,7 @@ def index():
 @ui_bp.route("/static/<path:path>")
 def static_files(path):
     """Serve static files from the frontend build directory."""
-    static_dir = current_app.config.get("FRONTEND_DIR")
+    static_dir = Config.FRONTEND_DIR
     if not static_dir:
         static_dir = os.path.join(os.path.dirname(__file__), "..", "static", "dist")
     return send_from_directory(static_dir, path)

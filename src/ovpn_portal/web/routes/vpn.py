@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, send_file, current_app, request
 import tempfile
 import os
 
+from ...core.config import Config
 from ...core.vpn import VPNManager
 from ..middleware import require_auth
 
@@ -12,7 +13,7 @@ vpn_bp = Blueprint("vpn", __name__, url_prefix="/vpn")
 @require_auth
 def download_config(email):
     try:
-        vpn_manager = VPNManager(current_app.config)
+        vpn_manager = VPNManager(Config)
         config = vpn_manager.generate_config(email)
 
         # Create temporary file

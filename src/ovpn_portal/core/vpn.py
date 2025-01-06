@@ -4,18 +4,20 @@ import subprocess
 from pathlib import Path
 from typing import Optional
 
+from .config import Config
+
 
 class VPNManager:
     """Manages OpenVPN operations."""
 
     def __init__(self, config):
         self.config = config
-        self.easy_rsa_dir = Path(config["OPENVPN_DIR"]) / "easy-rsa"
+        self.easy_rsa_dir = Path(config.OPENVPN_DIR) / "easy-rsa"
 
     def ensure_client_certificates(self, email: str) -> None:
         """Ensure client certificates exist, generate if needed."""
-        cert_path = Path(self.config["OPENVPN_DIR"]) / f"{email}.crt"
-        key_path = Path(self.config["OPENVPN_DIR"]) / f"{email}.key"
+        cert_path = Path(self.config.OPENVPN_DIR) / f"{email}.crt"
+        key_path = Path(self.config.OPENVPN_DIR) / f"{email}.key"
 
         if cert_path.exists() and key_path.exists():
             return
@@ -52,7 +54,7 @@ class VPNManager:
                     self.easy_rsa_dir
                     / f"pki/{'issued' if ext == '.crt' else 'private'}/{email}{ext}"
                 )
-                dst = Path(self.config["OPENVPN_DIR"]) / f"{email}{ext}"
+                dst = Path(self.config.OPENVPN_DIR) / f"{email}{ext}"
                 dst.write_bytes(src.read_bytes())
 
         except subprocess.CalledProcessError as e:
@@ -62,20 +64,23 @@ class VPNManager:
         """Generate OpenVPN configuration for a user."""
         self.ensure_client_certificates(email)
 
-        config_template = Path(__file__).parent / "templates/client.ovpn"
-        config = config_template.read_text()
+        # Get the absolute path to the templates directory
+        current_file = Path(__file__)  # Get the path of the current file
+        template_path = current_file.parent / "templates" / "client.ovpn"
+
+        config = template_path.read_text()
 
         # Replace placeholders
         replacements = {
-            "{{EXTERNAL_IP}}": self.config["EXTERNAL_IP"],
-            "{{CA_CERT}}": (Path(self.config["OPENVPN_DIR"]) / "ca.crt").read_text(),
+            "{{EXTERNAL_IP}}": self.config.EXTERNAL_IP,
+            "{{CA_CERT}}": (Path(self.config.OPENVPN_DIR) / "ca.crt").read_text(),
             "{{CLIENT_CERT}}": (
-                Path(self.config["OPENVPN_DIR"]) / f"{email}.crt"
+                Path(self.config.OPENVPN_DIR) / f"{email}.crt"
             ).read_text(),
             "{{CLIENT_KEY}}": (
-                Path(self.config["OPENVPN_DIR"]) / f"{email}.key"
+                Path(self.config.OPENVPN_DIR) / f"{email}.key"
             ).read_text(),
-            "{{TLS_AUTH}}": (Path(self.config["OPENVPN_DIR"]) / "ta.key").read_text(),
+            "{{TLS_AUTH}}": (Path(self.config.OPENVPN_DIR) / "ta.key").read_text(),
         }
 
         for key, value in replacements.items():

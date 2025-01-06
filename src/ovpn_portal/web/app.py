@@ -14,9 +14,9 @@ def create_app(config_object=None):
     )
 
     if config_object is None:
-        config_object = Config()
-
-    app.config.from_object(config_object)
+        app.config.from_object("ovpn_portal.core.config.Config")
+    else:
+        app.config.update(config_object)
 
     # Initialize CORS
     CORS(app)

@@ -1,6 +1,8 @@
 from functools import wraps
 from flask import jsonify, request, current_app
+
 from ..core.auth import AuthManager
+from ..core.config import Config
 
 
 def require_auth(f):
@@ -12,7 +14,7 @@ def require_auth(f):
 
         token = auth_header.split(" ")[1]
         try:
-            auth_manager = AuthManager(current_app.config)
+            auth_manager = AuthManager(Config)
             email = auth_manager.verify_token(token)
             return f(email, *args, **kwargs)
         except Exception as e:
