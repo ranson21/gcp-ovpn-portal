@@ -1,6 +1,7 @@
 import click
 from ...web.app import create_app
 from ...core.config import Config
+from ...core.cli import print_openvpn_logo
 
 
 @click.command()
@@ -17,7 +18,7 @@ def serve(ctx, host, port, workers):
             "Missing required configuration. Please check your environment variables."
         )
 
-    click.echo(f"Starting OpenVPN Client Portal on {host}:{port}")
+    click.echo(print_openvpn_logo())
 
     app = create_app()
 

@@ -180,3 +180,12 @@ verb 3"""
     )
 
     return template_file
+
+
+@pytest.fixture
+def auth_client(client):
+    """Create an authenticated test client."""
+    with client.session_transaction() as session:
+        session["email"] = "test@test.com"
+        session["token"] = "test-token"
+    return client
