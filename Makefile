@@ -53,6 +53,7 @@ clean:
 
 # Build package
 build:
+	@cd src/ovpn_portal/static && npm install && npm run build
 	$(POETRY) build
 
 # Publish to Test PyPI
