@@ -5,7 +5,6 @@ POETRY = poetry
 
 # Install dependencies
 install:
-	@mkdir -p tmp/logs
 	$(POETRY) install
 
 # Run local version
@@ -14,6 +13,7 @@ run:
 
 # Run development server
 dev:
+	@mkdir -p tmp/logs
 	$(POETRY) run dev
 
 # Run tests
@@ -23,6 +23,8 @@ test:
 # Run tests with coverage
 coverage:
 	$(POETRY) run pytest --cov=ovpn_portal --cov-report=term-missing --cov-report=html --cov-report=xml:coverage.xml tests/
+	$(POETRY) run python -m pip install codecov
+	$(POETRY) run codecov -f coverage.xml
 	@echo "Coverage report generated in coverage_html/index.html"
 
 # Run linting
@@ -61,8 +63,13 @@ publish-test:
 
 # Publish to PyPI
 publish:
-	$(POETRY) config pypi-token.pypi ${TEST_PYPI_TOKEN}
-	$(POETRY) publish
+	@if [ "$(PUBLISH)" != "true" ]; then \
+		echo "Skipping PyPI publish for non-merge build"; \
+	else \
+		echo "Publishing to PyPI:"; \
+		$(POETRY) config pypi-token.pypi ${PYPI_TOKEN}; \
+		$(POETRY) publish; \
+	fi
 
 # Setup local development environment
 dev-setup:
