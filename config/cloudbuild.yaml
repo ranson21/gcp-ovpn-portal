@@ -25,19 +25,10 @@ steps:
 
   # Update pyproject.toml version
   - name: "us-central1-docker.pkg.dev/${PROJECT_ID}/docker/dev-tools-builder-basic"
-    entrypoint: "bash"
+    entrypoint: "sh"
     args:
       - "-c"
-      - |
-        NEW_VERSION=$(cat new_version.txt)
-        pip install toml
-        python -c "
-        import toml
-        config = toml.load('pyproject.toml')
-        config['tool']['poetry']['version'] = '$${NEW_VERSION}'
-        with open('pyproject.toml', 'w') as f:
-            toml.dump(config, f)
-        "
+      - make bump-version NEW_VERSION=$$(cat new_version.txt)
     id: "update-version"
     waitFor: ["bump-version"]
 

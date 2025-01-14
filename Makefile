@@ -3,6 +3,9 @@
 # Poetry as the package manager
 POETRY = poetry
 
+# Define the default version as an empty string if not provided
+NEW_VERSION ?=
+
 # Install dependencies
 install:
 	$(POETRY) install
@@ -38,6 +41,10 @@ format:
 	$(POETRY) run autoflake --in-place --remove-all-unused-imports --recursive .
 	$(POETRY) run isort src/ovpn_portal/ tests/
 	$(POETRY) run black src/ovpn_portal/ tests/
+
+# Target to bump version in pyproject.toml
+bump-version:
+	$(POETRY) run python config/scripts/bump_version.py
 
 # Clean up temporary files and builds
 clean:
