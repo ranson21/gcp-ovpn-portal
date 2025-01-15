@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "gcp-ovpn-portal"
-version = "0.0.19"
+version = "0.3.2"
 description = "A secure OpenVPN authentication portal with Google OAuth2"
 authors = [ "Abigail Ranson <abby@abbyranson.com>",]
 readme = "README.md"
@@ -13,7 +13,7 @@ repository = "https://github.com/ranson21/ovpn-client-web"
 documentation = "https://github.com/ranson21/ovpn-client-web#readme"
 keywords = [ "vpn", "openvpn", "oauth", "google-auth", "flask",]
 license = "MIT"
-include = [ "src/ovpn_portal/static/dist/**/*",]
+include = [ "src/ovpn_portal/static/dist/**/*", "src/ovpn_portal/core/templates/*.ovpn",]
 classifiers = [ "Development Status :: 4 - Beta", "Environment :: Web Environment", "Framework :: Flask", "Intended Audience :: System Administrators", "License :: OSI Approved :: MIT License", "Operating System :: OS Independent", "Programming Language :: Python :: 3", "Programming Language :: Python :: 3.8", "Programming Language :: Python :: 3.9", "Programming Language :: Python :: 3.10", "Topic :: System :: Systems Administration", "Topic :: Security",]
 [[tool.poetry.packages]]
 include = "ovpn_portal"

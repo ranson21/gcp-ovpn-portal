@@ -49,7 +49,21 @@ steps:
     entrypoint: "make"
     args: ["build"]
     id: "build"
-    waitFor: ["lint"]
+    waitFor:
+      ["lint"]
+
+      # Debug build output
+  - name: "us-central1-docker.pkg.dev/${PROJECT_ID}/docker/dev-tools-builder:basic"
+    entrypoint: "sh"
+    args:
+      - "-c"
+      - |
+        echo "Built package contents:"
+        ls -R dist/
+        echo "Static directory after build:"
+        ls -R src/ovpn_portal/static/
+    id: "debug-build"
+    waitFor: ["build"]
 
   - name: "us-central1-docker.pkg.dev/${PROJECT_ID}/docker/dev-tools-builder:basic"
     entrypoint: "make"
