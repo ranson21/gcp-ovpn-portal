@@ -107,6 +107,7 @@ availableSecrets:
       env: "CODECOV_TOKEN"
 
 substitutions:
+  _PATH: '\$PATH'
   _PR_TYPE: "timestamp"
   _REPO: "gcp-ovpn-portal"
   _REPO_OWNER: ""
