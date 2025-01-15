@@ -122,4 +122,4 @@ substitutions:
   _IS_MERGE: "false"
   _PR_NUMBER: ""
   _PARENT_REPO: "portfolio" # Parent repository name
-  _SUBMODULE_PATH: "assets/web/gcp-ovpn-portal" # Path to submodule in parent repo
+  _SUBMODULE_PATH: "apps/web/gcp-ovpn-portal" # Path to submodule in parent repo
