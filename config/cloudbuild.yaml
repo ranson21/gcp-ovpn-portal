@@ -28,7 +28,9 @@ steps:
     entrypoint: "sh"
     args:
       - "-c"
-      - make bump-version NEW_VERSION=$$(cat new_version.txt)
+      - |
+        poetry self update 1.8.5
+        make bump-version NEW_VERSION=$$(cat new_version.txt)
     id: "update-version"
     waitFor: ["bump-version"]
 
@@ -57,6 +59,7 @@ steps:
     args:
       - "-c"
       - |
+        poetry --version
         echo "Built package contents:"
         tar -xvf dist/gcp_ovpn_portal-$$(sed 's/^v//' new_version.txt).tar.gz
         cat pyproject.toml
