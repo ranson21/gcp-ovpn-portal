@@ -44,13 +44,26 @@ steps:
     id: "lint"
     waitFor: ["install"]
 
-  # # Build package
-  # - name: "us-central1-docker.pkg.dev/${PROJECT_ID}/docker/dev-tools-builder:basic"
-  #   entrypoint: "make"
-  #   args: ["build"]
-  #   id: "build"
-  #   waitFor:
-  #     ["lint"]
+  # Build package
+  - name: "us-central1-docker.pkg.dev/${PROJECT_ID}/docker/dev-tools-builder:basic"
+    entrypoint: "make"
+    args: ["build"]
+    id: "build"
+    waitFor: ["lint"]
+
+  # Debug build output
+  - name: "us-central1-docker.pkg.dev/${PROJECT_ID}/docker/dev-tools-builder:basic"
+    entrypoint: "sh"
+    args:
+      - "-c"
+      - |
+        echo "Built package contents:"
+        tar -xvf dist/gcp_ovpn_portal-$$(cat new_version.txt).tar.gz
+        cat pyproject.toml
+        echo "Static directory after build:"
+        ls -R src/ovpn_portal/static/dist
+    id: "debug-build"
+    waitFor: ["build"]
 
   - name: "us-central1-docker.pkg.dev/${PROJECT_ID}/docker/dev-tools-builder:basic"
     entrypoint: "make"
@@ -61,7 +74,7 @@ steps:
       - "EXTERNAL_IP=1.2.3.4"
     secretEnv: ["CODECOV_TOKEN"]
     id: "test"
-    waitFor: ["lint"]
+    waitFor: ["build"]
 
   # Publish to PyPI if this is a merge to main
   - name: "us-central1-docker.pkg.dev/${PROJECT_ID}/docker/dev-tools-builder:basic"
@@ -71,21 +84,7 @@ steps:
       - make publish PUBLISH=${_IS_MERGE}
     secretEnv: ["PYPI_TOKEN"]
     id: "publish"
-    waitFor:
-      ["test"]
-
-      # Debug build output
-  - name: "us-central1-docker.pkg.dev/${PROJECT_ID}/docker/dev-tools-builder:basic"
-    entrypoint: "sh"
-    args:
-      - "-c"
-      - |
-        echo "Built package contents:"
-        tar -xvf dist/gcp_ovpn_portal-$$(cat new_version.txt).tar.gz
-        echo "Static directory after build:"
-        ls -R src/ovpn_portal/static/dist
-    id: "debug-build"
-    waitFor: ["publish"]
+    waitFor: ["test"]
 
   # Create GitHub release
   - name: "us-central1-docker.pkg.dev/${PROJECT_ID}/docker/github-ops-builder"
