@@ -54,6 +54,10 @@ steps:
   - name: "us-central1-docker.pkg.dev/${PROJECT_ID}/docker/dev-tools-builder:basic"
     entrypoint: "make"
     args: ["coverage"]
+    env:
+      - "CLIENT_ID=test-client-id"
+      - "ALLOWED_DOMAIN=test.com"
+      - "EXTERNAL_IP=1.2.3.4"
     secretEnv: ["CODECOV_TOKEN"]
     id: "test"
     waitFor: ["build"]
