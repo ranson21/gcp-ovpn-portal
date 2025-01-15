@@ -28,9 +28,7 @@ steps:
     entrypoint: "sh"
     args:
       - "-c"
-      - |
-        export PATH=$$PATH:/root/.local/bin:/home/builder/.local/bin
-        make bump-version NEW_VERSION=$$(cat new_version.txt)
+      - make bump-version NEW_VERSION=$$(cat new_version.txt)
     id: "update-version"
     waitFor: ["bump-version"]
 
