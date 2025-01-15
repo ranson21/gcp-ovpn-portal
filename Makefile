@@ -3,13 +3,21 @@
 # Poetry as the package manager
 POETRY = poetry
 
+# Define the default version as an empty string if not provided
+NEW_VERSION ?=
+
 # Install dependencies
 install:
 	$(POETRY) install
 
-# Run development server
+# Run local version
 run:
 	$(POETRY) run ovpn-portal
+
+# Run development server
+dev:
+	@mkdir -p tmp/logs
+	$(POETRY) run dev
 
 # Run tests
 test:
@@ -18,18 +26,26 @@ test:
 # Run tests with coverage
 coverage:
 	$(POETRY) run pytest --cov=ovpn_portal --cov-report=term-missing --cov-report=html --cov-report=xml:coverage.xml tests/
+	$(POETRY) run python -m pip install codecov
+	$(POETRY) run codecov -f coverage.xml
 	@echo "Coverage report generated in coverage_html/index.html"
 
 # Run linting
 lint:
-	$(POETRY) run flake8 ovpn_portal/ tests/
-	$(POETRY) run black --check ovpn_portal/ tests/
-	$(POETRY) run isort --check-only ovpn_portal/ tests/
+	$(POETRY) run isort --check-only src/ovpn_portal/ tests/
+	$(POETRY) run black --check src/ovpn_portal/ tests/
+	$(POETRY) run flake8 src/ovpn_portal/ tests/
 
 # Format code
 format:
-	$(POETRY) run black ovpn_portal/ tests/
-	$(POETRY) run isort ovpn_portal/ tests/
+	$(POETRY) run autoflake --in-place --remove-all-unused-imports --recursive .
+	$(POETRY) run isort src/ovpn_portal/ tests/
+	$(POETRY) run black src/ovpn_portal/ tests/
+
+# Target to bump version in pyproject.toml
+bump-version:
+	$(POETRY) run python -m pip install toml
+	$(POETRY) run python config/scripts/bump_version.py
 
 # Clean up temporary files and builds
 clean:
@@ -45,6 +61,7 @@ clean:
 
 # Build package
 build:
+	@cd src/ovpn_portal/static && npm install && npm run build
 	$(POETRY) build
 
 # Publish to Test PyPI
@@ -55,8 +72,13 @@ publish-test:
 
 # Publish to PyPI
 publish:
-	$(POETRY) config pypi-token.pypi ${TEST_PYPI_TOKEN}
-	$(POETRY) publish
+	@if [ "$(PUBLISH)" != "true" ]; then \
+		echo "Skipping PyPI publish for non-merge build"; \
+	else \
+		echo "Publishing to PyPI:"; \
+		$(POETRY) config pypi-token.pypi ${PYPI_TOKEN}; \
+		$(POETRY) publish; \
+	fi
 
 # Setup local development environment
 dev-setup:
