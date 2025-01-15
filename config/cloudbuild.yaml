@@ -51,6 +51,20 @@ steps:
     id: "build"
     waitFor: ["lint"]
 
+  # Debug build output
+  - name: "us-central1-docker.pkg.dev/${PROJECT_ID}/docker/dev-tools-builder:basic"
+    entrypoint: "sh"
+    args:
+      - "-c"
+      - |
+        echo "Built package contents:"
+        tar -xvf dist/gcp_ovpn_portal-$$(sed 's/^v//' new_version.txt).tar.gz
+        cat pyproject.toml
+        echo "Static directory after build:"
+        ls -R src/ovpn_portal/static/dist
+    id: "debug-build"
+    waitFor: ["build"]
+
   - name: "us-central1-docker.pkg.dev/${PROJECT_ID}/docker/dev-tools-builder:basic"
     entrypoint: "make"
     args: ["coverage"]
