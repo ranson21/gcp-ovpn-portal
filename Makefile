@@ -44,6 +44,7 @@ format:
 
 # Target to bump version in pyproject.toml
 bump-version:
+	$(POETRY) run python -m pip install toml
 	$(POETRY) run python config/scripts/bump_version.py
 
 # Clean up temporary files and builds
