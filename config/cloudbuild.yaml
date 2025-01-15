@@ -28,9 +28,7 @@ steps:
     entrypoint: "sh"
     args:
       - "-c"
-      - |
-        poetry self update 1.8.5
-        make bump-version NEW_VERSION=$$(cat new_version.txt)
+      - make bump-version NEW_VERSION=$$(cat new_version.txt)
     id: "update-version"
     waitFor: ["bump-version"]
 
@@ -53,21 +51,6 @@ steps:
     id: "build"
     waitFor: ["lint"]
 
-  # Debug build output
-  - name: "us-central1-docker.pkg.dev/${PROJECT_ID}/docker/dev-tools-builder:basic"
-    entrypoint: "sh"
-    args:
-      - "-c"
-      - |
-        poetry --version
-        echo "Built package contents:"
-        tar -xvf dist/gcp_ovpn_portal-$$(sed 's/^v//' new_version.txt).tar.gz
-        cat pyproject.toml
-        echo "Static directory after build:"
-        ls -R src/ovpn_portal/static/dist
-    id: "debug-build"
-    waitFor: ["build"]
-
   - name: "us-central1-docker.pkg.dev/${PROJECT_ID}/docker/dev-tools-builder:basic"
     entrypoint: "make"
     args: ["coverage"]
@@ -88,6 +71,19 @@ steps:
     secretEnv: ["PYPI_TOKEN"]
     id: "publish"
     waitFor: ["test"]
+
+  # Debug build output
+  - name: "us-central1-docker.pkg.dev/${PROJECT_ID}/docker/dev-tools-builder:basic"
+    entrypoint: "sh"
+    args:
+      - "-c"
+      - |
+        echo "Built package contents:"
+        tar -xvf dist/gcp_ovpn_portal-$$(sed 's/^v//' new_version.txt).tar.gz
+        echo "Static directory after build:"
+        ls -R src/ovpn_portal/static/dist
+    id: "debug-build"
+    waitFor: ["publish"]
 
   # Create GitHub release
   - name: "us-central1-docker.pkg.dev/${PROJECT_ID}/docker/github-ops-builder"
