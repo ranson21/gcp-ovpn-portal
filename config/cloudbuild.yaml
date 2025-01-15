@@ -24,7 +24,7 @@ steps:
     waitFor: ["get-version"]
 
   # Update pyproject.toml version
-  - name: "us-central1-docker.pkg.dev/${PROJECT_ID}/docker/dev-tools-builder:basic-v0.0.2"
+  - name: "us-central1-docker.pkg.dev/${PROJECT_ID}/docker/dev-tools-builder:basic"
     entrypoint: "sh"
     args:
       - "-c"
