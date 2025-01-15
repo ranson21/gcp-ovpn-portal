@@ -24,7 +24,7 @@ steps:
     waitFor: ["get-version"]
 
   # Update pyproject.toml version
-  - name: "us-central1-docker.pkg.dev/${PROJECT_ID}/docker/dev-tools-builder-basic"
+  - name: "us-central1-docker.pkg.dev/${PROJECT_ID}/docker/dev-tools-builder:basic"
     entrypoint: "sh"
     args:
       - "-c"
@@ -32,20 +32,20 @@ steps:
     id: "update-version"
     waitFor: ["bump-version"]
 
-  - name: "us-central1-docker.pkg.dev/${PROJECT_ID}/docker/dev-tools-builder-basic"
+  - name: "us-central1-docker.pkg.dev/${PROJECT_ID}/docker/dev-tools-builder:basic"
     entrypoint: "make"
     args: ["lint"]
     id: "lint"
     waitFor: ["update-version"]
 
   # Build package
-  - name: "us-central1-docker.pkg.dev/${PROJECT_ID}/docker/dev-tools-builder-basic"
+  - name: "us-central1-docker.pkg.dev/${PROJECT_ID}/docker/dev-tools-builder:basic"
     entrypoint: "make"
     args: ["build"]
     id: "build"
     waitFor: ["lint"]
 
-  - name: "us-central1-docker.pkg.dev/${PROJECT_ID}/docker/dev-tools-builder-basic"
+  - name: "us-central1-docker.pkg.dev/${PROJECT_ID}/docker/dev-tools-builder:basic"
     entrypoint: "make"
     args: ["coverage"]
     secretEnv: ["CODECOV_TOKEN"]
@@ -53,7 +53,7 @@ steps:
     waitFor: ["build"]
 
   # Publish to PyPI if this is a merge to main
-  - name: "us-central1-docker.pkg.dev/${PROJECT_ID}/docker/dev-tools-builder-basic"
+  - name: "us-central1-docker.pkg.dev/${PROJECT_ID}/docker/dev-tools-builder:basic"
     entrypoint: "bash"
     args:
       - "-c"
