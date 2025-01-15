@@ -74,7 +74,7 @@ publish-test:
 	$(POETRY) publish -r testpypi
 
 # Publish to PyPI
-publish:
+publish: build
 	@if [ "$(PUBLISH)" != "true" ]; then \
 		echo "Skipping PyPI publish for non-merge build"; \
 	else \
