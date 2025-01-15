@@ -63,7 +63,7 @@ clean:
 build:
 	@echo "Starting build process..."
 	@echo "Current directory: $$(pwd)"
-	@cd src/ovpn_portal/static && echo "Static directory before npm: $$(pwd)" && rm -rf node_modules package-lock.json && npm cache clean --force && npm install && npm run build
+	@cd src/ovpn_portal/static && echo "Static directory before npm: $$(pwd)" && npm install && npm run build
 	@echo "Static assets build complete, returning to root: $$(pwd)"
 	$(POETRY) build --verbose
 
@@ -74,7 +74,7 @@ publish-test:
 	$(POETRY) publish -r testpypi
 
 # Publish to PyPI
-publish: build
+publish:
 	@if [ "$(PUBLISH)" != "true" ]; then \
 		echo "Skipping PyPI publish for non-merge build"; \
 	else \
