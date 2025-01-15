@@ -65,6 +65,7 @@ build:
 	@echo "Current directory: $$(pwd)"
 	@cd src/ovpn_portal/static && echo "Static directory before npm: $$(pwd)" && npm install && npm run build
 	@echo "Static assets build complete, returning to root: $$(pwd)"
+	$(POETRY) config virtualenvs.create false
 	$(POETRY) build --verbose
 
 # Publish to Test PyPI
