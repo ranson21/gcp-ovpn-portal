@@ -128,18 +128,25 @@ export const NetworkMetrics = () => {
       {/* Connection Details */}
       <div className="space-y-3">
         {/* Current Location */}
-        <div className="flex justify-between items-center text-sm">
-          <span className="text-gray-600">Location</span>
-          <span className="font-medium text-right max-w-28">
-            {metrics.location.loading
-              ? "Loading..."
-              : `${metrics.location.city}, ${metrics.location.region} ${metrics.location.country}`}
-          </span>
+        <div className="flex justify-between items-start text-sm">
+          <span className="text-gray-600">Location:</span>
+          <div className="text-right">
+            <div className="font-medium">
+              {metrics.location.loading
+                ? "Loading..."
+                : `${metrics.location.city}, ${metrics.location.region}`}
+            </div>
+            <div className="font-medium text-gray-500 text-xs">
+              {metrics.location.loading
+                ? "Loading..."
+                : metrics.location.country}
+            </div>
+          </div>
         </div>
 
         {/* ISP Info */}
         <div className="flex justify-between items-center text-sm">
-          <span className="text-gray-600 max-w-24">Network Provider</span>
+          <span className="text-gray-600">Network Provider:</span>
           <span className="font-medium text-right max-w-28">
             {metrics.location.loading
               ? "Loading..."
@@ -149,13 +156,13 @@ export const NetworkMetrics = () => {
 
         {/* IP Address */}
         <div className="flex justify-between items-center text-sm">
-          <span className="text-gray-600">IP Address</span>
+          <span className="text-gray-600">IP Address:</span>
           <span className="font-medium">{clientIp || "Unknown"}</span>
         </div>
 
         {/* Response Time */}
         <div className="flex justify-between items-center text-sm">
-          <span className="text-gray-600">Response Time</span>
+          <span className="text-gray-600">Response Time:</span>
           <span
             className={`font-medium ${
               metrics.latency.value < 100
