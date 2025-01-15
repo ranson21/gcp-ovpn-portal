@@ -61,8 +61,11 @@ clean:
 
 # Build package
 build:
-	@cd src/ovpn_portal/static && npm install && npm run build
-	$(POETRY) build
+	@echo "Starting build process..."
+	@echo "Current directory: $$(pwd)"
+	@cd src/ovpn_portal/static && echo "Static directory before npm: $$(pwd)" && npm install && npm run build
+	@echo "Static assets build complete, returning to root: $$(pwd)"
+	$(POETRY) build --verbose
 
 # Publish to Test PyPI
 publish-test:
