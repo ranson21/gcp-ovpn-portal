@@ -17,7 +17,7 @@ def main():
 
     # Update the version
     try:
-        config["tool"]["poetry"]["version"] = new_version
+        config["tool"]["poetry"]["version"] = new_version.lstrip("v")
     except KeyError:
         raise KeyError("Invalid pyproject.toml structure: 'tool.poetry.version' not found")
 

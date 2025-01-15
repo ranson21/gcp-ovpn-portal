@@ -58,7 +58,7 @@ steps:
       - "-c"
       - |
         echo "Built package contents:"
-        tar -xvf dist/gcp_ovpn_portal-$$(cat new_version.txt).tar.gz
+        tar -xvf dist/gcp_ovpn_portal-$$(sed 's/^v//' new_version.txt).tar.gz
         cat pyproject.toml
         echo "Static directory after build:"
         ls -R src/ovpn_portal/static/dist
